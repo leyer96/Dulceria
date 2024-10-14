@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     )
 from PySide6.QtCore import Qt
 from models.basket_model import BasketModel
+from views.dialogs.set_amount import SetAmountDialog
 
 class BasketWidget(QWidget):
     def __init__(self):
@@ -67,8 +68,35 @@ class BasketWidget(QWidget):
 
         # SIGNALS
         self.model.total.connect(lambda total: self.amount_label.setText("${}".format(total)))
+        self.table.clicked.connect(self.on_clicked_row)
+        edit_btn.clicked.connect(self.select_amount)
+        del_btn.clicked.connect(self.delete_item)
 
         # PROPS
         self.selected_row = None
+        
+    def on_clicked_row(self, index):
+        self.selected_row = index.row()
+
+    def select_amount(self):
+        row = self.selected_row
+        if row != None:
+            product = self.model._data[row][1]
+            amount = self.model._data[row][3]
+            dlg = SetAmountDialog(product, amount)
+            dlg.amount.connect(lambda amount: self.update_amount(row, amount))
+            dlg.exec()
+
+    def update_amount(self, row, amount):
+        self.model._data[row][3] = amount
+        self.model.calculate_total()
+        self.model.layoutChanged.emit()
+
+    def delete_item(self, row):
+        row = self.selected_row
+        if row != None:
+            del(self.model._data[row])
+            self.model.calculate_total()
+            self.model.layoutChanged.emit()
 
 

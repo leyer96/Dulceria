@@ -12,6 +12,7 @@ from PySide6.QtSql import QSqlQueryModel, QSqlQuery
 from PySide6.QtCore import Qt, Signal
 from utils import Paths
 from views.dialogs.set_amount import SetAmountDialog
+from views.dialogs.edit_item import EditItemDialog
 
 class SearchBox(QWidget):
     item_data = Signal(list)
@@ -19,6 +20,9 @@ class SearchBox(QWidget):
         super().__init__()
 
         self.db = db
+
+        self.search_str = ""
+        self.filter = None
 
         self.model = QSqlQueryModel()
 
@@ -50,6 +54,7 @@ class SearchBox(QWidget):
         # SIGNALS
         self.table.clicked.connect(self.on_clicked_row)
         add_btn.clicked.connect(self.select_amount)
+        edit_btn.clicked.connect(self.open_item_edit_dialog)
 
         # PROPS
         self.selected_row = None
@@ -64,14 +69,15 @@ class SearchBox(QWidget):
 
     def search(self, search_data):
         str = search_data[0]
+        self.search_str = str
         filter = search_data[1]
+        self.filter = filter
         query = """
             SELECT id, name, price FROM product_test
             WHERE {} LIKE '%{}%'
         """.format(filter, str)
         Qquery = QSqlQuery(query, db=self.db)
         r = self.model.setQuery(Qquery)
-        print(r)
 
     def on_clicked_row(self, index):
         self.selected_row = index.row()
@@ -91,3 +97,20 @@ class SearchBox(QWidget):
         price = self.model.data(self.model.index(row, 2))
         item_data = [id, product, price, amount]
         self.item_data.emit(item_data)
+
+    def open_item_edit_dialog(self):
+        row = self.selected_row
+        if row != None:
+            product_id = self.model.data(self.model.index(row, 0))
+            dlg = EditItemDialog(self.db, product_id)
+            dlg.item_edited.connect(self.refresh_table)
+            dlg.exec()
+
+    def refresh_table(self):
+        query = """
+            SELECT id, name, price FROM product_test
+            WHERE {} LIKE '%{}%'
+        """.format(self.filter, self.search_str)
+        Qquery = QSqlQuery(query, db=self.db)
+        self.model.setQuery(Qquery)
+        self.model.layoutChanged.emit()
