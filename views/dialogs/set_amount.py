@@ -13,7 +13,7 @@ class SetAmountDialog(QDialog):
     def __init__(self, product, amount=1):
         super().__init__()
 
-        text = QLabel("Ingrese la cantindad de {} a añadir.".format(product))
+        text_label = QLabel("Ingrese la cantindad de {} a añadir.".format(product))
 
         form = QFormLayout()
         amount_input = QSpinBox()
@@ -25,8 +25,7 @@ class SetAmountDialog(QDialog):
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
         layout = QVBoxLayout()
-        layout.addWidget(text)
-        layout.addLayout(layout)
+        layout.addWidget(text_label)
         layout.addWidget(amount_input)
         layout.addWidget(button_box)
 

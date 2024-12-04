@@ -6,11 +6,14 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QLabel,
     QAbstractItemView,
-    QHeaderView
+    QHeaderView,
+    QMessageBox
     )
 from PySide6.QtCore import Qt
 from models.basket_model import BasketModel
 from views.dialogs.set_amount import SetAmountDialog
+from views.dialogs.register_payment import RegisterPaymentDialog
+from utils import save_payment
 
 class BasketWidget(QWidget):
     def __init__(self):
@@ -71,6 +74,7 @@ class BasketWidget(QWidget):
         self.table.clicked.connect(self.on_clicked_row)
         edit_btn.clicked.connect(self.select_amount)
         del_btn.clicked.connect(self.delete_item)
+        confirm_btn.clicked.connect(self.open_payment_dialog)
 
         # PROPS
         self.selected_row = None
@@ -99,4 +103,20 @@ class BasketWidget(QWidget):
             self.model.calculate_total()
             self.model.layoutChanged.emit()
 
-
+    def open_payment_dialog(self):
+        if len(self.model._data) > 0:
+            amount = self.amount_label.text()
+            amount = amount[1:]
+            dlg = RegisterPaymentDialog(amount=amount)
+            dlg.data.connect(self.save_payment)
+            dlg.exec()
+    
+    def save_payment(self, payment_data):
+        products = self.model._data
+        success = save_payment(payment_data, products)
+        if success:
+            self.model.reset_basket()
+            self.model.layoutChanged.emit()
+            QMessageBox.information(self, "Registro exitoso", "Pago registrado correctamente")
+        else:
+            QMessageBox.critical(self, "Registro fallido", "Ha ocurrido un error. Contacte al administrador.")

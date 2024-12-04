@@ -32,4 +32,8 @@ class BasketModel(QAbstractTableModel):
         for item in self._data:
             total += item[3]*int(item[2])
         self.total.emit(total)
+
+    def reset_basket(self):
+        self._data = []
+        self.total.emit(0)
         

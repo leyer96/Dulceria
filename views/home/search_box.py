@@ -35,14 +35,14 @@ class SearchBox(QWidget):
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
 
         add_btn = QPushButton("Agregar")
-        edit_btn = QPushButton("Editar")
+        # edit_btn = QPushButton("Editar")
 
         # LAYOUT
 
         layout = QVBoxLayout()
 
         btns_layout = QHBoxLayout()
-        btns_layout.addWidget(edit_btn)
+        # btns_layout.addWidget(edit_btn)
         btns_layout.addWidget(add_btn)
 
         layout.addWidget(self.table)
@@ -51,7 +51,7 @@ class SearchBox(QWidget):
         # SIGNALS
         self.table.clicked.connect(self.on_clicked_row)
         add_btn.clicked.connect(self.select_amount)
-        edit_btn.clicked.connect(self.open_item_edit_dialog)
+        # edit_btn.clicked.connect(self.open_item_edit_dialog)
 
         # PROPS
         self.selected_row = None
@@ -83,6 +83,7 @@ class SearchBox(QWidget):
         item_data = [id, product, price, amount]
         self.item_data.emit(item_data)
 
+    # MOVER A PRODUCTS WINDOW
     def open_item_edit_dialog(self):
         row = self.selected_row
         if row != None:
