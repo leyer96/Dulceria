@@ -13,6 +13,7 @@ from PySide6.QtCore import Qt, Signal
 from utils import Paths
 from views.dialogs.set_amount import SetAmountDialog
 from views.dialogs.edit_item import EditItemDialog
+from models.search_model import SearchModel
 
 class SearchBox(QWidget):
     item_data = Signal(list)
@@ -24,11 +25,7 @@ class SearchBox(QWidget):
         self.search_str = ""
         self.filter = None
 
-        self.model = QSqlQueryModel()
-
-        self.model.setHeaderData(0, Qt.Horizontal, "Id")
-        self.model.setHeaderData(1, Qt.Horizontal, "Product")
-        self.model.setHeaderData(2, Qt.Horizontal, "Price")
+        self.model = SearchModel(db)
 
         self.table = QTableView()
         self.table.setModel(self.model)
@@ -66,18 +63,6 @@ class SearchBox(QWidget):
         # self.setPalette(palette)
 
         self.setLayout(layout)
-
-    def search(self, search_data):
-        str = search_data[0]
-        self.search_str = str
-        filter = search_data[1]
-        self.filter = filter
-        query = """
-            SELECT id, name, price FROM product_test
-            WHERE {} LIKE '%{}%'
-        """.format(filter, str)
-        Qquery = QSqlQuery(query, db=self.db)
-        r = self.model.setQuery(Qquery)
 
     def on_clicked_row(self, index):
         self.selected_row = index.row()

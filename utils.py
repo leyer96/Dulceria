@@ -2,7 +2,7 @@ import os
 
 class Paths:
     base = os.path.dirname(__file__)
-    data_dir = os.path.join(base, "data")
+    data = os.path.join(base, "data")
     icons = os.path.join(base, "resources/icons")  
     models = os.path.join(base, "models")
     settings = os.path.join(base, "config")
@@ -12,8 +12,8 @@ class Paths:
     
     # File loaders
     @classmethod
-    def data(cls, filename):
-        return os.path.join(cls.data_dir, filename)
+    def db(cls):
+        return os.path.join(cls.data, "db.db")
     @classmethod
     def icon(cls, filename):
         return os.path.join(cls.icons, filename)
