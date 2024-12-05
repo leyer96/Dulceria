@@ -8,10 +8,12 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QDialogButtonBox,
 )
-
+from PySide6.QtCore import Signal
 from PySide6.QtSql import QSqlQuery
 
+
 class AddItemDialog(QDialog):
+    saved = Signal()
     def __init__(self, db):
         super().__init__()
 
@@ -91,6 +93,7 @@ class AddItemDialog(QDialog):
         # ----- USAR SQLITE ??? -----
         success = query.exec()
         if success:
+            self.saved.emit()
             self.close()
         else:
             self.message_label.setText("Ha ocurrido un error. Intente de nuevo o contacte al administrador.")

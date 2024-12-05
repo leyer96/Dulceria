@@ -8,32 +8,30 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QGridLayout
 )
-from views.home.menu_widget import Menu
 from views.home.search_widget import SearchWidget
 from models.payment_model import PaymentModel
 
 class PaymentsWindow(QWidget):
-        def __init__(self, db):
+        def __init__(self, db, menu):
             super().__init__()
+            
             self.db = db
+            self.menu = menu
             self.search_widget = SearchWidget()
-            self.menu = Menu()
             self.table = QTableView()
             self.model = PaymentModel(db)
+
             self.table.setModel(self.model)
             self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
             self.table.setSelectionMode(QAbstractItemView.SingleSelection)
             self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-
-            # PASAR METODOS A WIDGET MENU
-            # self.menu.go_to_add_product_btn.clicked.connect(self.open_add_dialog)
-
+        
+            # CONFIG
+            self.menu.go_to_payments_btn.hide()
+            
+            # LAYOUT
             grid = QGridLayout()
-
             grid.addWidget(self.search_widget, 0, 0, 2, 12)
-            grid.addWidget(self.table, 2, 0, 5, 10)
-            grid.addWidget(self.menu, 2, 11, 5, 1)
-
-            self.menu.go_to_payments_list_btn.hide()
-
+            grid.addWidget(self.table, 2, 0, 10, 9)
+            grid.addWidget(self.menu, 2, 9, 5, 3)
             self.setLayout(grid)

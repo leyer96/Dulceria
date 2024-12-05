@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QStackedLayout, QWidget
 from views.home.home_window import HomeWindow
+from views.menu_widget import Menu
 from views.products.products_window import ProductsWindow
 from views.payments.payments_window import PaymentsWindow
 
@@ -8,27 +9,21 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.resize(700, 500)
-
-        home_window = HomeWindow(db)
-        products_window = ProductsWindow(db)
-        payments_window = PaymentsWindow(db)
+ 
+        windows = [HomeWindow, ProductsWindow, PaymentsWindow]
 
         container = QWidget()
         container_layout = QStackedLayout()
-        container_layout.addWidget(home_window)
-        container_layout.addWidget(products_window)
-        container_layout.addWidget(payments_window)
+
+        for window in windows:
+            menu = Menu()
+            menu.go_to_home.connect(lambda: container_layout.setCurrentIndex(0))
+            menu.go_to_products.connect(lambda: container_layout.setCurrentIndex(1))
+            menu.go_to_payments.connect(lambda: container_layout.setCurrentIndex(2))
+            w = window(db, menu)
+            container_layout.addWidget(w)
+
         container.setLayout(container_layout)
-
-        home_window.menu.go_to_product_list_btn.clicked.connect(lambda: container_layout.setCurrentIndex(1))
-        home_window.menu.go_to_payments_list_btn.clicked.connect(lambda: container_layout.setCurrentIndex(2)) # ELIMINAR -> BOTON PARA OBTENER TODOS LOS REGISTROS
-        home_window.menu.go_to_product_list_btn.clicked.connect(products_window.model.get_all_prodcuts) # ELIMINAR -> BOTON PARA OBTENER TODOS LOS REGISTROS
-        home_window.menu.go_to_payments_list_btn.clicked.connect(payments_window.model.get_all_payments) # ELIMINAR -> BOTON PARA OBTENER TODOS LOS REGISTROS
-
-        products_window.menu.go_to_home_btn.clicked.connect(lambda: container_layout.setCurrentIndex(0))
-
-        payments_window.menu.go_to_home_btn.clicked.connect(lambda: container_layout.setCurrentIndex(0))
-        
         
         self.setCentralWidget(container)
         self.show()

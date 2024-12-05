@@ -5,8 +5,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
     QLineEdit,
-    QDialogButtonBox,
-    QHBoxLayout
+    QDialogButtonBox
 )
 from PySide6.QtCore import Signal
 from PySide6.QtSql import QSqlQuery

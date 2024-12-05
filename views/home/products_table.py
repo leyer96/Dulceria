@@ -7,9 +7,10 @@ from PySide6.QtWidgets import (
     QWidget,
     QHeaderView
 )
-from PySide6.QtGui import QPalette, QColor
-from PySide6.QtSql import QSqlQueryModel, QSqlQuery
+# from PySide6.QtGui import QPalette, QColor
+from PySide6.QtSql import  QSqlQuery
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QIcon
 from utils import Paths
 from views.dialogs.set_amount import SetAmountDialog
 from views.dialogs.edit_item import EditItemDialog
@@ -34,7 +35,7 @@ class SearchBox(QWidget):
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        add_btn = QPushButton("Agregar")
+        add_btn = QPushButton(QIcon(Paths.icon("shopping-basket--plus.png")),"Agregar")
         # edit_btn = QPushButton("Editar")
 
         # LAYOUT
@@ -42,7 +43,6 @@ class SearchBox(QWidget):
         layout = QVBoxLayout()
 
         btns_layout = QHBoxLayout()
-        # btns_layout.addWidget(edit_btn)
         btns_layout.addWidget(add_btn)
 
         layout.addWidget(self.table)
@@ -51,16 +51,9 @@ class SearchBox(QWidget):
         # SIGNALS
         self.table.clicked.connect(self.on_clicked_row)
         add_btn.clicked.connect(self.select_amount)
-        # edit_btn.clicked.connect(self.open_item_edit_dialog)
 
         # PROPS
         self.selected_row = None
-
-        # WIDGET BACKGROUND WHITE
-        # palette = self.palette()
-        # palette.setColor(QPalette.Window, QColor("white"))
-        # self.setAutoFillBackground(True)
-        # self.setPalette(palette)
 
         self.setLayout(layout)
 
@@ -82,21 +75,4 @@ class SearchBox(QWidget):
         price = self.model.data(self.model.index(row, 2))
         item_data = [id, product, price, amount]
         self.item_data.emit(item_data)
-
-    # MOVER A PRODUCTS WINDOW
-    def open_item_edit_dialog(self):
-        row = self.selected_row
-        if row != None:
-            product_id = self.model.data(self.model.index(row, 0))
-            dlg = EditItemDialog(self.db, product_id)
-            dlg.item_edited.connect(self.refresh_table)
-            dlg.exec()
-
-    def refresh_table(self):
-        query = """
-            SELECT id, name, price FROM product_test
-            WHERE {} LIKE '%{}%'
-        """.format(self.filter, self.search_str)
-        Qquery = QSqlQuery(query, db=self.db)
-        self.model.setQuery(Qquery)
-        self.model.layoutChanged.emit()
+        

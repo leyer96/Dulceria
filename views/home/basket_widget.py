@@ -10,10 +10,11 @@ from PySide6.QtWidgets import (
     QMessageBox
     )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from models.basket_model import BasketModel
 from views.dialogs.set_amount import SetAmountDialog
 from views.dialogs.register_payment import RegisterPaymentDialog
-from utils import save_payment
+from utils import save_payment, Paths
 
 class BasketWidget(QWidget):
     def __init__(self):
@@ -33,9 +34,9 @@ class BasketWidget(QWidget):
 
         self.amount_label = QLabel("$0")
 
-        del_btn = QPushButton("Eliminar")
-        edit_btn = QPushButton("Editar")
-        confirm_btn = QPushButton("Cobrar")
+        del_btn = QPushButton(QIcon(Paths.icon("shopping-basket--minus.png")),"Eliminar")
+        edit_btn = QPushButton(QIcon(Paths.icon("shopping-basket--pencil.png")),"Editar")
+        confirm_btn = QPushButton(QIcon(Paths.icon("credit-card--plus.png")),"Cobrar")
 
         # LAYOUT
 
@@ -64,8 +65,8 @@ class BasketWidget(QWidget):
         right_container = QWidget()
         right_container.setLayout(right_layout)
     
-        layout.addWidget(left_container, stretch = 8)
-        layout.addWidget(right_container, stretch = 4)
+        layout.addWidget(left_container, stretch = 9)
+        layout.addWidget(right_container, stretch = 3)
 
         self.setLayout(layout)        
 

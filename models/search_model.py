@@ -1,9 +1,11 @@
 from PySide6.QtSql import QSqlQueryModel, QSqlQuery
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 import sqlite3
 from utils import Paths
 
 class SearchModel(QSqlQueryModel):
+    error = Signal()
+    success = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -24,6 +26,8 @@ class SearchModel(QSqlQueryModel):
             """)
     
     def search(self, search_str, filter):
+        self.search_str = search_str
+        self.filter = filter
         query = """
             SELECT id, name, price, category, code FROM product_test
             WHERE {} LIKE '%{}%'
@@ -38,7 +42,27 @@ class SearchModel(QSqlQueryModel):
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
 
+    def refresh_table(self):
+        query = """
+            SELECT id, name, price, category, code FROM product_test
+            WHERE {} LIKE '%{}%'
+        """.format(self.filter, self.search_str)
+        Qquery = QSqlQuery(query, db=self.db)
+        self.setQuery(Qquery)
 
+    def delete_product(self, product_id):
+        con = sqlite3.connect(Paths.db())
+        cur = con.cursor()
+        try:
+            cur.execute("""
+                DELETE FROM product_test WHERE id=?
+            """,(product_id,))
+            con.commit()
+        except:
+            self.error.emit()
+        else:
+            self.success.emit()
+            self.refresh_table()
 
     def headerData(self, section, orientation, role):
            if role == Qt.DisplayRole:
