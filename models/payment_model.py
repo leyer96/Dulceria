@@ -17,6 +17,11 @@ class PaymentModel(QSqlQueryModel):
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
 
+    def headerData(self, section, orientation, role):
+           if role == Qt.DisplayRole:
+               if orientation == Qt.Horizontal:
+                   return self.headers[section]
+               
     def get_all_payments(self):
         query = """
             SELECT * FROM payment_test
@@ -24,7 +29,17 @@ class PaymentModel(QSqlQueryModel):
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
 
-    def headerData(self, section, orientation, role):
-           if role == Qt.DisplayRole:
-               if orientation == Qt.Horizontal:
-                   return self.headers[section]
+    def search(self, date_data):
+        start_date = date_data["start_date"]
+        start_date_str = start_date.toString("yyyy-MM-dd")
+        end_date = date_data["end_date"]
+        end_date = end_date.addDays(1)
+        end_date_str = end_date.toString("yyyy-MM-dd")
+        print(start_date_str)
+        query = """
+            SELECT * FROM payment_test WHERE timestamp
+            BETWEEN '{}' AND '{}'
+        """.format(start_date_str, end_date_str)
+        Qquery = QSqlQuery(query, db=self.db)
+        self.setQuery(Qquery)
+        

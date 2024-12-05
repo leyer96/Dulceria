@@ -33,6 +33,13 @@ class Paths:
     def view(cls, filename):
         return os.path.join(cls.views, filename)
     
+def toggle_btns_state(btns):
+    for btn in btns:
+        if btn.isEnabled():
+            btn.setEnabled(False)
+        else:
+            btn.setEnabled(True)
+
 import sqlite3
 def create_test_tables():
     con = sqlite3.connect(Paths.db())
@@ -69,6 +76,8 @@ def drop_test_tables():
     cur.execute("DROP TABLE productpayment_test")
 
 def save_payment(payment_data, products):
+    print("PASSED PRODUCTS")
+    print(products)
     con = sqlite3.connect(Paths.db())
     cur = con.cursor()
     payment_form = payment_data["payment_form"]
@@ -85,6 +94,8 @@ def save_payment(payment_data, products):
         payment_id = cur.lastrowid
 
         for product in products:
+            print("SAVING PRODUT")
+            print(product)
             product_id = int(product[0])
             product_name = product[1]
             unit_price = float(product[2])
@@ -96,8 +107,7 @@ def save_payment(payment_data, products):
                 con.commit()
             except:
                 return False
-            else:
-                return True
+        return True
 
 
     

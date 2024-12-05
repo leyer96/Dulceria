@@ -6,7 +6,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QWidget,
     QHBoxLayout,
-    QMessageBox
+    QMessageBox,
+    QLabel
 )
 from PySide6.QtGui import QIcon
 from views.home.search_widget import SearchWidget
@@ -27,16 +28,17 @@ class ProductsWindow(QWidget):
         self.delete_product_btn = QPushButton(QIcon(Paths.icon("minus-button.png")),"Eliminar Producto")
         self.table = QTableView()
         self.model = SearchModel(db)
-
+        title = QLabel("Productos")
+        
+        # CONFIG
         self.table.setModel(self.model)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        
-        # CONFIG
         self.edit_product_btn.setEnabled(False)
         self.delete_product_btn.setEnabled(False)
         self.menu.go_to_products_btn.hide()
+        title.setStyleSheet("font-size: 30px; font-weight: bold")
         self.selected_row = -1
 
          # SIGNALS
@@ -55,10 +57,12 @@ class ProductsWindow(QWidget):
         buttons_layout.addWidget(self.delete_product_btn)
 
         grid = QGridLayout()
-        grid.addWidget(self.search_widget, 0, 0, 2, 12)
-        grid.addLayout(buttons_layout, 2, 0, 1, 9)
-        grid.addWidget(self.table, 3, 0, 9, 9)
+        grid.addWidget(title, 0, 0, 1, 12)
+        grid.addWidget(self.search_widget, 1, 0, 1, 12)
+        grid.addWidget(self.table, 2, 0, 9, 9)
+        grid.addLayout(buttons_layout, 11, 0, 1, 9)
         grid.addWidget(self.menu, 2, 9, 5, 3)
+        
         self.setLayout(grid)
         
     def handle_search(self):
