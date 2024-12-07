@@ -1,5 +1,4 @@
 import os
-
 class Paths:
     base = os.path.dirname(__file__)
     data = os.path.join(base, "data")
@@ -33,6 +32,7 @@ class Paths:
     def view(cls, filename):
         return os.path.join(cls.views, filename)
     
+# GUI
 def toggle_btns_state(btns):
     for btn in btns:
         if btn.isEnabled():
@@ -40,6 +40,7 @@ def toggle_btns_state(btns):
         else:
             btn.setEnabled(True)
 
+# DB
 import sqlite3
 def create_test_tables():
     con = sqlite3.connect(Paths.db())
@@ -108,6 +109,73 @@ def save_payment(payment_data, products):
             except:
                 return False
         return True
+    
+def get_all_from_productpayment():
+    con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    data = cur.execute(""" 
+        SELECT * FROM productpayment_test
+        JOIN payment_test ON productpayment_test.payment_id = payment_test.id
+    """).fetchall()
+    return data
+
+def get_prodcutpayment_from_payment_id(payment_id):
+    con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    data = cur.execute(""" 
+        SELECT * FROM productpayment_test
+        JOIN payment_test ON productpayment_test.payment_id = payment_test.id
+        WHERE payment_test.id = ?
+    """, (payment_id,)).fetchall()
+    return data
+
+from datetime import datetime, timedelta
+def get_prodcutpayment_from_month(month):
+    month = months.index(month) + 1
+    curr_date = datetime.today()
+    year = curr_date.year
+    date_start = datetime(day=1, month=month, year = year)
+    if month == 12:
+        month = 1
+        year = year + 1
+    date_end = datetime(year=year, month=month+1, day=1) - timedelta(days=1)
+    date_start_str = date_start.strftime("%Y-%m-%d")
+    date_end_str = date_end.strftime("%Y-%m-%d")
+    con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    data = cur.execute(""" 
+        SELECT * FROM productpayment_test
+        JOIN payment_test ON productpayment_test.payment_id = payment_test.id
+        WHERE payment_test.timestamp BETWEEN ? AND ?;
+    """, (date_start_str, date_end_str)).fetchall()
+    return data
+
+import csv
+def create_csv_file(data, headers, folder_path, filename):
+    path = folder_path + "/" + filename +  ".csv"
+    with open(path, "w") as f:
+        writer = csv.writer(f)
+        field = headers
+        writer.writerow(field)
+        for row in data:
+            writer.writerow(row)
+
+# GLOBAL
+months = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre"
+    ]
+
 
 
     
