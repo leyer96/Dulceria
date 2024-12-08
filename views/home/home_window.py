@@ -28,7 +28,7 @@ class HomeWindow(QWidget):
         
         # LAYOUT
         grid = QGridLayout()
-        grid.addWidget(self.search_widget, 0, 0, 2, 12)
+        grid.addWidget(self.search_widget, 0, 0, 2, 9)
         grid.addWidget(self.search_box, 2, 0, 5, 9)
         grid.addWidget(self.checkout, 7, 0, 5, 12)
         grid.addWidget(self.menu, 2, 9, 5, 3)

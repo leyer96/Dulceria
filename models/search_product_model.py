@@ -10,20 +10,7 @@ class SearchModel(QSqlQueryModel):
         super().__init__()
         self.db = db
         self.headers = ["Id", "Producto", "Precio", "Categoría", "Código"]
-        self.create_test_table()
-
-    def create_test_table(self):
-        con = sqlite3.connect(Paths.db())
-        cur = con.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS product_test (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,  
-                name TEXT NOT NULL, 
-                price FLOAT NOT NULL,  
-                category TEXT NOT NULL,
-                code TEXT
-            );
-            """)
+        self.filter = None
     
     def search(self, search_str, filter):
         self.search_str = search_str
@@ -43,12 +30,13 @@ class SearchModel(QSqlQueryModel):
         self.setQuery(Qquery)
 
     def refresh_table(self):
-        query = """
-            SELECT id, name, price, category, code FROM product_test
-            WHERE {} LIKE '%{}%'
-        """.format(self.filter, self.search_str)
-        Qquery = QSqlQuery(query, db=self.db)
-        self.setQuery(Qquery)
+        if self.filter:
+            query = """
+                SELECT id, name, price, category, code FROM product_test
+                WHERE {} LIKE '%{}%'
+            """.format(self.filter, self.search_str)
+            Qquery = QSqlQuery(query, db=self.db)
+            self.setQuery(Qquery)
 
     def delete_product(self, product_id):
         con = sqlite3.connect(Paths.db())

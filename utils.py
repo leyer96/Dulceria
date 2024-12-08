@@ -47,6 +47,16 @@ def create_test_tables():
     cur = con.cursor()
     
     cur.execute("""
+        CREATE TABLE IF NOT EXISTS product_test (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                price FLOAT NOT NULL,
+                category TEXT NOT NULL,
+                code TEXT
+                )
+                """)
+    
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS payment_test (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -67,6 +77,29 @@ def create_test_tables():
                 FOREIGN KEY (product_id) REFERENCES product_test(id)
                 FOREIGN KEY (payment_id) REFERENCES payment_test(id)
             );
+                """)
+    cur.execute(""" 
+        CREATE TABLE IF NOT EXISTS stock_test (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER NOT NULL,
+                product TEXT NOT NULL,
+                amount INT DEFAULT 0,
+                status INT DEFAULT 1,
+                FOREIGN KEY (product_id) REFERENCES product_test(id)
+                )
+                """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS batch_test (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER NOT NULL,
+                stock_id INTEGER NOT NULL,
+                product TEXT NOT NULL,
+                amount INT NOT NULL,
+                expiration_date DATE,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (product_id) REFERENCES produt_test(id)
+                FOREIGN KEY (stock_id) REFERENCES stock(id)
+                )
                 """)
     
 def drop_test_tables():

@@ -68,6 +68,7 @@ class SelectExportDataDialog(QDialog):
             month = self.month_input.currentText()
             if month != "--SELECCIONAR--":
                 self.option_selected.emit(self.month_input.currentText())
+                self.close()
             else:
                 self.msg_label.setText("Seleccione un mes")
                 self.msg_label.show()

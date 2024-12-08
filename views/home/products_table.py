@@ -14,7 +14,7 @@ from PySide6.QtGui import QIcon
 from utils import Paths
 from views.dialogs.set_amount import SetAmountDialog
 from views.dialogs.edit_item import EditItemDialog
-from models.search_model import SearchModel
+from models.search_product_model import SearchModel
 
 class SearchBox(QWidget):
     item_data = Signal(list)

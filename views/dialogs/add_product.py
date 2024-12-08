@@ -7,9 +7,12 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QLineEdit,
     QDialogButtonBox,
+    QMessageBox,
 )
 from PySide6.QtCore import Signal
 from PySide6.QtSql import QSqlQuery
+import sqlite3
+from utils import Paths
 
 
 class AddItemDialog(QDialog):
@@ -37,12 +40,13 @@ class AddItemDialog(QDialog):
 
         self.message_label = QLabel()
         self.message_label.hide()
+        self.message_label.setWordWrap(True)
         self.message_label.setStyleSheet("color: red;")
 
         layout = QVBoxLayout()
         layout.addLayout(form)
-        layout.addWidget(button_box)
         layout.addWidget(self.message_label)
+        layout.addWidget(button_box)
 
         self.setLayout(layout)
 
@@ -72,8 +76,6 @@ class AddItemDialog(QDialog):
             self.message_label.setText(error_message)
             self.message_label.show()
 
-        # ---- AGREGAR MENSAJE DE FORMULARIO INVÁLIDO ----
-
     def add_item(self, item_data):
         name = item_data["name"]
         price = item_data["price"]
@@ -81,20 +83,28 @@ class AddItemDialog(QDialog):
         code = item_data["code"]
         if not code:
             code = None
-        # ----- USAR SQLITE ??? -----
-        query = QSqlQuery(db=self.db)
-        query.prepare("""
-            INSERT INTO product_test (name, price, category, code) VALUES(?,?,?,?)
-        """)
-        query.addBindValue(name)
-        query.addBindValue(price)
-        query.addBindValue(category)
-        query.addBindValue(code)
-        # ----- USAR SQLITE ??? -----
-        success = query.exec()
-        if success:
-            self.saved.emit()
-            self.close()
+        con = sqlite3.connect(Paths.db())
+        cur = con.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO product_test (name, price, category, code) VALUES(?,?,?,?)
+            """, (name, price, category, code))
+            con.commit()
+        except:
+            self.message_label.setText("Ya existe un producto con este nombre. Modifique el producto o elimínelo.")
+            self.message_label.show()
         else:
-            self.message_label.setText("Ha ocurrido un error. Intente de nuevo o contacte al administrador.")
+            product_id = cur.lastrowid
+            try:
+                cur.execute("""
+                    INSERT INTO stock_test (product_id, product)
+                    VALUES(?, ?)
+                """, (product_id, name))
+                con.commit()
+            except:
+                self.message_label.setText("Ha habido un error al generar stock. Intente de nuevo. Si el problema persiste, contacte al administratodr.")
+                self.message_label.show()
+            else:
+                self.saved.emit()
+                self.close()
 

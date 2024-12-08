@@ -7,7 +7,8 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QHeaderView,
     QGridLayout,
-    QFileDialog
+    QFileDialog,
+    QMessageBox
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -113,21 +114,23 @@ class PaymentsWindow(QWidget):
                   month = option
                   data = get_prodcutpayment_from_month(month)
                   fn = "datos-" + month
-            print(data)
-            dirname = QFileDialog.getExistingDirectory(self, "Seleccionar Folder")
-            if dirname:
-                  formated_data = []
-                  for entry in data:
-                        timestamp = entry[7]
-                        dateandtime = timestamp.split(" ")
-                        payment_id = entry[2]
-                        payment_form = entry[9]
-                        product = entry[3]
-                        amount = entry[4]
-                        price = entry[5]
-                        data = [payment_id, *dateandtime, product, price, amount, payment_form]
-                        formated_data.append(data)
-                  headers = ["ID_PAGO", "FECHA", "HORA", "PRODUCTO", "PRECIO UNITARIO", "CANTIDAD", "FORMAD DE PAGO"]
-                  create_csv_file(formated_data, headers, dirname, fn)
+            if len(data) > 0:
+                  dirname = QFileDialog.getExistingDirectory(self, "Seleccionar Folder")
+                  if dirname:
+                        formated_data = []
+                        for entry in data:
+                              timestamp = entry[7]
+                              dateandtime = timestamp.split(" ")
+                              payment_id = entry[2]
+                              payment_form = entry[9]
+                              product = entry[3]
+                              amount = entry[4]
+                              price = entry[5]
+                              data = [payment_id, *dateandtime, product, price, amount, payment_form]
+                              formated_data.append(data)
+                        headers = ["ID_PAGO", "FECHA", "HORA", "PRODUCTO", "PRECIO UNITARIO", "CANTIDAD", "FORMAD DE PAGO"]
+                        create_csv_file(formated_data, headers, dirname, fn)
+            else:
+                  dlg = QMessageBox.information(self, "Estatus", "No hay datos que exportar con los parámetros seleccionados.")
 
                   
