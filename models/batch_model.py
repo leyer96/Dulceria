@@ -46,3 +46,4 @@ class BatchModel(QSqlQueryModel):
            if role == Qt.DisplayRole:
                if orientation == Qt.Horizontal:
                    return self.headers[section]
+ 
