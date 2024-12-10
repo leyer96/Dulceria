@@ -13,7 +13,7 @@ from PySide6.QtGui import QIcon
 from views.home.search_widget import SearchWidget
 from models.search_product_model import SearchModel
 from views.dialogs.add_product import AddItemDialog
-from views.dialogs.edit_item import EditItemDialog
+from views.dialogs.edit_product import EditItemDialog
 from utils import Paths
 
 class ProductsWindow(QWidget):
@@ -93,7 +93,8 @@ class ProductsWindow(QWidget):
     def open_add_dialog(self):
         dlg = AddItemDialog(self.db)
         dlg.saved.connect(self.model.refresh_table)
-        dlg.saved.connect(self.toggle_btns_state)
+        if self.edit_product_btn.isEnabled():
+            dlg.saved.connect(self.toggle_btns_state)
         dlg.exec()
     
     def open_edit_dialog(self, row):

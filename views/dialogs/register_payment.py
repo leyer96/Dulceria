@@ -12,13 +12,15 @@ from PySide6.QtCore import Signal
 
 class RegisterPaymentDialog(QDialog):
     data = Signal(dict)
-    def __init__(self, amount=0):
+    def __init__(self, productsamount=[], amount=0):
         super().__init__()
 
         self.amount = float(amount)
 
         h1 = QLabel("TOTAL: ${}".format(amount))
         h1.setStyleSheet("font-size: 20px;")
+
+        productsamount_label = QLabel("\n".join(productsamount))
 
         form = QFormLayout()
         self.payment_form_input = QComboBox()
@@ -37,9 +39,10 @@ class RegisterPaymentDialog(QDialog):
 
         layout = QVBoxLayout()
         layout.addWidget(h1)
+        layout.addWidget(productsamount_label)
         layout.addLayout(form)
-        layout.addWidget(button_box)
         layout.addWidget(self.message_label)
+        layout.addWidget(button_box)
 
         self.setLayout(layout)
 

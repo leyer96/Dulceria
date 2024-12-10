@@ -14,7 +14,7 @@ from PySide6.QtGui import QIcon
 from models.basket_model import BasketModel
 from views.dialogs.set_amount import SetAmountDialog
 from views.dialogs.register_payment import RegisterPaymentDialog
-from utils import save_payment, Paths
+from utils import save_payment, Paths, substract_from_stock
 
 class BasketWidget(QWidget):
     def __init__(self):
@@ -108,14 +108,19 @@ class BasketWidget(QWidget):
         if len(self.model._data) > 0:
             amount = self.amount_label.text()
             amount = amount[1:]
-            dlg = RegisterPaymentDialog(amount=amount)
+            productsamount = []
+            for row in self.model._data:
+                productamount_str = "{} x {}".format(row[3], row[1])
+                productsamount.append(productamount_str)
+            dlg = RegisterPaymentDialog(productsamount=productsamount,amount=amount)
             dlg.data.connect(self.save_payment)
             dlg.exec()
     
     def save_payment(self, payment_data):
         products = self.model._data
-        success = save_payment(payment_data, products)
-        if success:
+        successful_payment = save_payment(payment_data, products)
+        successful_stock_update = substract_from_stock(products)
+        if successful_payment and successful_stock_update:
             self.model.reset_basket()
             self.model.layoutChanged.emit()
             QMessageBox.information(self, "Registro exitoso", "Pago registrado correctamente")

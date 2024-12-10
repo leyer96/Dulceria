@@ -97,6 +97,7 @@ def create_test_tables():
                 amount INT NOT NULL,
                 expiration_date DATE,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                show INTEGER DEFAULT 1,
                 FOREIGN KEY (product_id) REFERENCES produt_test(id)
                 FOREIGN KEY (stock_id) REFERENCES stock(id)
                 )
@@ -106,8 +107,12 @@ def drop_test_tables():
     con = sqlite3.connect(Paths.db())
     cur = con.cursor()
 
-    cur.execute("DROP TABLE payment_test")
-    cur.execute("DROP TABLE productpayment_test")
+    cur.execute("DROP TABLE IF EXISTS payment_test")
+    cur.execute("DROP TABLE IF EXISTS productpayment_test")
+    cur.execute("DROP TABLE IF EXISTS product_test")
+    cur.execute("DROP TABLE IF EXISTS stock_test")
+    cur.execute("DROP TABLE IF EXISTS batch_test")
+
 
 def save_payment(payment_data, products):
     print("PASSED PRODUCTS")
@@ -182,6 +187,21 @@ def get_prodcutpayment_from_month(month):
         WHERE payment_test.timestamp BETWEEN ? AND ?;
     """, (date_start_str, date_end_str)).fetchall()
     return data
+
+def substract_from_stock(products):
+    con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    for product in products:
+        product_id = product[0]
+        amount = product[3]
+        prev_amount = cur.execute("SELECT amount from stock_test where stock_test.product_id = ?", (product_id,)).fetchone()[0]
+        if prev_amount > 0:
+            new_amount = prev_amount - amount
+            cur.execute("UPDATE stock_test SET amount = ? WHERE stock_test.product_id = ?", (new_amount, product_id))
+        else:
+            print("ERROR DE EMPAREJAMIENTO CON STOCK REAL")
+    con.commit()
+    return True
 
 import csv
 def create_csv_file(data, headers, folder_path, filename):

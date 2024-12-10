@@ -9,11 +9,13 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QLabel
 )
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from views.home.search_widget import SearchWidget
 from models.stock_model import StockModel
-from views.dialogs.edit_item import EditItemDialog
-from utils import Paths
+from models.batch_model import BatchModel
+from views.dialogs.add_batch import AddBatchDialog
+from utils import Paths, toggle_btns_state
 
 class StockWindow(QWidget):
     def __init__(self, db, menu):
@@ -25,19 +27,26 @@ class StockWindow(QWidget):
         self.stock_table = QTableView()
         self.batch_table = QTableView()
         self.stock_model = StockModel(db)
-        # self.batch_model = SearchModel(db)
+        self.batch_model = BatchModel(db)
         stock_title = QLabel("Stock")
         batch_title = QLabel("Lotes")
         add_batch_btn = QPushButton(QIcon(Paths.icon("plus-button.png")),"Agregar Lote")
+        self.resolve_batch_btn = QPushButton(QIcon(Paths.icon("blue-document-task.png")), "Resolver")
         
         # CONFIG
         self.stock_table.setModel(self.stock_model)
         self.stock_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.stock_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.stock_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        self.batch_table.setModel(self.batch_model)
         self.batch_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.batch_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.batch_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.batch_table.clicked.connect(self.on_clicked_row)
+
+        self.selected_row = -1
+        self.resolve_batch_btn.setEnabled(False)
         self.menu.go_to_stock_btn.hide()
         stock_title.setStyleSheet("font-size: 30px; font-weight: bold")
 
@@ -45,11 +54,13 @@ class StockWindow(QWidget):
         self.search_widget.search_btn.clicked.connect(self.handle_search)
         self.search_widget.search_input.returnPressed.connect(self.handle_search)
         add_batch_btn.clicked.connect(self.open_add_batch_dialog)
+        self.resolve_batch_btn.clicked.connect(self.resolve_batch)
         # self.model.success.connect(self.toggle_btns_state)
         
         # LAYOUT
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(add_batch_btn)
+        buttons_layout.addWidget(self.resolve_batch_btn)
 
         grid = QGridLayout()
         grid.addWidget(stock_title, 0, 0, 1, 12)
@@ -76,35 +87,20 @@ class StockWindow(QWidget):
             pass
         self.filter = filter
         self.stock_model.search(str, filter)
+        self.batch_model.search(str, filter)
 
     def on_clicked_row(self, index):
         self.selected_row = index.row()
         if self.selected_row > -1:
-            if not self.edit_product_btn.isEnabled():
-                self.toggle_btns_state()
+            if not self.resolve_batch_btn.isEnabled():
+                toggle_btns_state([self.resolve_batch_btn])
     
     def open_add_batch_dialog(self):
-        pass
-    
-    def open_edit_dialog(self, row):
-        if row != None:
-            product_id = self.model.data(self.model.index(row, 0))
-            dlg = EditItemDialog(self.db, product_id)
-            dlg.item_edited.connect(self.model.refresh_table)
-            dlg.item_edited.connect(self.toggle_btns_state)
-            dlg.exec()
-        
-    def delete_product(self, row):
-        if row != None:
-            accepted = QMessageBox.question(self, "Confirmar", "Estás seguro que quieres eliminar este producto?")
-            if accepted:
-                product_id = int(self.model.data(self.model.index(row, 0)))
-                self.model.delete_product(product_id)
+        dlg = AddBatchDialog()
+        dlg.exec()
 
-    def toggle_btns_state(self):
-        if self.edit_product_btn.isEnabled():
-            self.edit_product_btn.setEnabled(False)
-            self.delete_product_btn.setEnabled(False)
-        else:
-            self.edit_product_btn.setEnabled(True)
-            self.delete_product_btn.setEnabled(True)
+    def resolve_batch(self):
+        row = self.selected_row
+        if row > -1:
+            batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
+            self.batch_model.update_batch_show_status(batch_id)
