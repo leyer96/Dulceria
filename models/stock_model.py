@@ -1,7 +1,5 @@
 from PySide6.QtSql import QSqlQueryModel, QSqlQuery
 from PySide6.QtCore import Qt, Signal
-import sqlite3
-from utils import Paths
 
 class StockModel(QSqlQueryModel):
     error = Signal()
@@ -25,9 +23,9 @@ class StockModel(QSqlQueryModel):
         print(Qquery.lastQuery())
         self.setQuery(Qquery)
 
-    def get_all_prodcuts(self):
+    def get_all_stock(self):
         query = """
-            SELECT * FROM stock_test
+            SELECT stock_test.product, product_test.category, stock_test.amount FROM stock_test
             JOIN product_test ON stock_test.product_id = product_test.id
             ORDER BY stock_test.amount
         """
@@ -37,11 +35,15 @@ class StockModel(QSqlQueryModel):
     def refresh_table(self):
         if self.filter:
             query = """
-                SELECT id, name, price, category, code FROM product_test
-                WHERE {} LIKE '%{}%'
-            """.format(self.filter, self.search_str)
+            SELECT stock_test.product, product_test.category, stock_test.amount FROM stock_test
+            JOIN product_test ON stock_test.product_id = product_test.id
+            WHERE product_test.{} like '%{}%'
+            ORDER BY stock_test.amount
+        """.format(self.filter, self.search_str)
             Qquery = QSqlQuery(query, db=self.db)
             self.setQuery(Qquery)
+        else:
+            self.get_all_stock()
 
     def headerData(self, section, orientation, role):
            if role == Qt.DisplayRole:

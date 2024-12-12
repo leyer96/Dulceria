@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QLabel
 )
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from views.home.search_widget import SearchWidget
 from models.search_product_model import SearchModel
@@ -35,6 +36,7 @@ class ProductsWindow(QWidget):
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.model.get_all_prodcuts()
         self.edit_product_btn.setEnabled(False)
         self.delete_product_btn.setEnabled(False)
         self.menu.go_to_products_btn.hide()
@@ -107,8 +109,8 @@ class ProductsWindow(QWidget):
         
     def delete_product(self, row):
         if row != None:
-            accepted = QMessageBox.question(self, "Confirmar", "Estás seguro que quieres eliminar este producto?")
-            if accepted:
+            selection = QMessageBox.question(self, "Confirmar", "Estás seguro que quieres eliminar este producto?")
+            if selection == QMessageBox.StandardButton.Yes:
                 product_id = int(self.model.data(self.model.index(row, 0)))
                 self.model.delete_product(product_id)
 

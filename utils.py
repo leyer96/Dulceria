@@ -214,6 +214,7 @@ def create_csv_file(data, headers, folder_path, filename):
             writer.writerow(row)
 
 # GLOBAL
+default_cb_str = "--SELECCIONAR--"
 months = [
     "Enero",
     "Febrero",

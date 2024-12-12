@@ -38,12 +38,14 @@ class StockWindow(QWidget):
         self.stock_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.stock_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.stock_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.stock_model.get_all_stock()
 
         self.batch_table.setModel(self.batch_model)
         self.batch_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.batch_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.batch_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.batch_table.clicked.connect(self.on_clicked_row)
+        self.batch_model.get_all_batchs()
 
         self.selected_row = -1
         self.resolve_batch_btn.setEnabled(False)
@@ -52,7 +54,9 @@ class StockWindow(QWidget):
 
          # SIGNALS
         self.search_widget.search_btn.clicked.connect(self.handle_search)
+        self.search_widget.search_btn.clicked.connect(lambda: self.resolve_batch_btn.setEnabled(False))
         self.search_widget.search_input.returnPressed.connect(self.handle_search)
+        self.search_widget.search_input.returnPressed.connect(lambda: self.resolve_batch_btn.setEnabled(False))
         add_batch_btn.clicked.connect(self.open_add_batch_dialog)
         self.resolve_batch_btn.clicked.connect(self.resolve_batch)
         # self.model.success.connect(self.toggle_btns_state)
@@ -97,6 +101,9 @@ class StockWindow(QWidget):
     
     def open_add_batch_dialog(self):
         dlg = AddBatchDialog()
+        dlg.saved.connect(lambda: self.resolve_batch_btn.setEnabled(False))
+        dlg.saved.connect(self.stock_model.refresh_table)
+        dlg.saved.connect(self.batch_model.refresh_table)
         dlg.exec()
 
     def resolve_batch(self):

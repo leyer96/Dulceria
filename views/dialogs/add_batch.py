@@ -9,11 +9,13 @@ from PySide6.QtWidgets import (
     QComboBox,
     QRadioButton
 )
-from PySide6.QtCore import QDate, QLocale
+from PySide6.QtCore import QDate, QLocale, Signal
 from utils import Paths
 import sqlite3
 
 class AddBatchDialog(QDialog):
+    saved = Signal()
+    error = Signal()
     def __init__(self):
         super().__init__()
 
@@ -113,6 +115,7 @@ class AddBatchDialog(QDialog):
                 self.message_label.setText("Ha ocurrido un error. Contacte al administrador.")
             else:
                 con.commit()
+                self.saved.emit()
                 self.close()
         except:
             self.message_label.setText("Ha ocurrido un error. Contacte al administrador.")

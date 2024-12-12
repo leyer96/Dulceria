@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -9,7 +10,7 @@ from PySide6.QtWidgets import (
     QWidget
     )
 from PySide6.QtGui import QIcon
-from utils import Paths
+from utils import Paths, default_cb_str
 
 
 class SearchWidget(QWidget):

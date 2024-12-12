@@ -25,6 +25,8 @@ class SearchModel(QSqlQueryModel):
     def get_all_prodcuts(self):
         query = """
             SELECT * FROM product_test
+            ORDER BY NAME
+            LIMIT 50
         """
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
@@ -34,7 +36,17 @@ class SearchModel(QSqlQueryModel):
             query = """
                 SELECT id, name, price, category, code FROM product_test
                 WHERE {} LIKE '%{}%'
+                ORDER BY NAME
+                LIMIT 50
             """.format(self.filter, self.search_str)
+            Qquery = QSqlQuery(query, db=self.db)
+            self.setQuery(Qquery)
+        else:
+            query = """
+            SELECT * FROM product_test
+            ORDER BY NAME
+            LIMIT 50
+            """
             Qquery = QSqlQuery(query, db=self.db)
             self.setQuery(Qquery)
 
