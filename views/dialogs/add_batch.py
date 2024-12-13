@@ -103,15 +103,12 @@ class AddBatchDialog(QDialog):
             stock_id = cur.execute("SELECT id FROM stock_test WHERE product_id = ?", (product_id,)).fetchone()[0]
             try:
                 prev_amount = cur.execute("SELECT amount from stock_test WHERE stock_test.product_id = ?", (product_id,)).fetchone()[0]
-                print("PREVIOUS AMOUNT: {}".format(prev_amount))
                 new_amount = prev_amount + amount
-                print("NEW AMOUNT: {}".format(new_amount))
                 cur.execute("UPDATE stock_test SET amount = ? WHERE stock_test.product_id = ?", (new_amount, product_id))
                 cur.execute(""" 
                     INSERT INTO batch_test (product_id, stock_id, product, amount, expiration_date) VALUES (?, ?, ?, ?, ?)
                     """, (product_id, stock_id, product, amount, date_str))
-            except sqlite3.Error as e:
-                print(e)
+            except:
                 self.message_label.setText("Ha ocurrido un error. Contacte al administrador.")
             else:
                 con.commit()

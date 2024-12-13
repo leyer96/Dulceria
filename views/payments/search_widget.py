@@ -52,6 +52,10 @@ class SearchWidget(QWidget):
         layout.addLayout(date_input_layout)
         self.setLayout(layout)
 
+    def to_default(self):
+        self.start_date_input.setDate(QDate().currentDate())
+        self.end_date_input.setDate(QDate().currentDate())
+    
     def emit_date_data(self):
         start_date = self.start_date_input.date()
         end_date = self.end_date_input.date()

@@ -49,9 +49,10 @@ def create_test_tables():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS product_test (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL UNIQUE,
+                name VARCHAR(100) NOT NULL UNIQUE,
+                brand VARCHAR(50) NOT NULL UNIQUE,
                 price FLOAT NOT NULL,
-                category TEXT NOT NULL,
+                category VARCHAR(20) NOT NULL,
                 code TEXT
                 )
                 """)
@@ -115,8 +116,6 @@ def drop_test_tables():
 
 
 def save_payment(payment_data, products):
-    print("PASSED PRODUCTS")
-    print(products)
     con = sqlite3.connect(Paths.db())
     cur = con.cursor()
     payment_form = payment_data["payment_form"]
@@ -126,26 +125,25 @@ def save_payment(payment_data, products):
         cur.execute("""
             INSERT INTO payment_test (payment_form, amount, note) VALUES(?,?,?)
                     """,(payment_form, amount, note))
-        con.commit()
     except:
         return False
     else:
         payment_id = cur.lastrowid
-
         for product in products:
             print("SAVING PRODUT")
             print(product)
             product_id = int(product[0])
             product_name = product[1]
-            unit_price = float(product[2])
-            amount = int(product[3])
+            unit_price = float(product[3])
+            amount = int(product[4])
             try:
                 cur.execute("""
                     INSERT INTO productpayment_test (product_id, payment_id, product_name, amount, unit_price) VALUES(?,?,?,?,?)
                         """,(product_id, payment_id, product_name, amount, unit_price))
-                con.commit()
             except:
                 return False
+            else:
+                con.commit()
         return True
     
 def get_all_from_productpayment():
@@ -193,7 +191,7 @@ def substract_from_stock(products):
     cur = con.cursor()
     for product in products:
         product_id = product[0]
-        amount = product[3]
+        amount = product[4]
         prev_amount = cur.execute("SELECT amount from stock_test where stock_test.product_id = ?", (product_id,)).fetchone()[0]
         if prev_amount > 0:
             new_amount = prev_amount - amount
@@ -215,6 +213,7 @@ def create_csv_file(data, headers, folder_path, filename):
 
 # GLOBAL
 default_cb_str = "--SELECCIONAR--"
+
 months = [
     "Enero",
     "Febrero",
@@ -229,6 +228,20 @@ months = [
     "Noviembre",
     "Diciembre"
     ]
+
+product_categories = [
+    default_cb_str,
+    "Dulce",
+    "Chocolate",
+    "Papas",
+    "Decoración",
+    "Fiesta",
+    "Desechable",
+    "Vestir"
+]
+
+date_raw_format = "%Y-%m-%d"
+date_format = "%d-%m-%Y"
 
 
 

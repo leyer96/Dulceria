@@ -35,30 +35,30 @@ class SearchBox(QWidget):
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        add_btn = QPushButton(QIcon(Paths.icon("shopping-basket--plus.png")),"Agregar")
-        # edit_btn = QPushButton("Editar")
+        self.add_btn = QPushButton(QIcon(Paths.icon("shopping-basket--plus.png")),"Agregar")
 
         # LAYOUT
-
         layout = QVBoxLayout()
 
         btns_layout = QHBoxLayout()
-        btns_layout.addWidget(add_btn)
+        btns_layout.addWidget(self.add_btn)
 
         layout.addWidget(self.table)
         layout.addLayout(btns_layout)
 
         # SIGNALS
         self.table.clicked.connect(self.on_clicked_row)
-        add_btn.clicked.connect(self.select_amount)
+        self.add_btn.clicked.connect(self.select_amount)
 
         # PROPS
         self.selected_row = None
-
+        self.add_btn.setEnabled(False)
         self.setLayout(layout)
 
     def on_clicked_row(self, index):
         self.selected_row = index.row()
+        if not self.add_btn.isEnabled():
+            self.add_btn.setEnabled(True)
     
     def select_amount(self):
         row = self.selected_row
@@ -72,7 +72,8 @@ class SearchBox(QWidget):
         row = self.selected_row
         id = self.model.data(self.model.index(row, 0))
         product = self.model.data(self.model.index(row, 1))
-        price = self.model.data(self.model.index(row, 2))
-        item_data = [id, product, price, amount]
+        brand = self.model.data(self.model.index(row, 2))
+        price = self.model.data(self.model.index(row, 3))
+        item_data = [id, product, brand, price, amount]
         self.item_data.emit(item_data)
         

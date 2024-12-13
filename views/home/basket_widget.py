@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QMessageBox
     )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
 from models.basket_model import BasketModel
 from views.dialogs.set_amount import SetAmountDialog
@@ -17,6 +17,7 @@ from views.dialogs.register_payment import RegisterPaymentDialog
 from utils import save_payment, Paths, substract_from_stock
 
 class BasketWidget(QWidget):
+    payment_saved = Signal()
     def __init__(self):
         super().__init__()
 
@@ -34,8 +35,8 @@ class BasketWidget(QWidget):
 
         self.amount_label = QLabel("$0")
 
-        del_btn = QPushButton(QIcon(Paths.icon("shopping-basket--minus.png")),"Eliminar")
-        edit_btn = QPushButton(QIcon(Paths.icon("shopping-basket--pencil.png")),"Editar")
+        self.del_btn = QPushButton(QIcon(Paths.icon("shopping-basket--minus.png")),"Eliminar")
+        self.edit_btn = QPushButton(QIcon(Paths.icon("shopping-basket--pencil.png")),"Editar")
         confirm_btn = QPushButton(QIcon(Paths.icon("credit-card--plus.png")),"Cobrar")
 
         # LAYOUT
@@ -43,8 +44,8 @@ class BasketWidget(QWidget):
         layout = QHBoxLayout()
 
         btns_layout = QHBoxLayout()
-        btns_layout.addWidget(del_btn)
-        btns_layout.addWidget(edit_btn)
+        btns_layout.addWidget(self.del_btn)
+        btns_layout.addWidget(self.edit_btn)
         
         left_layout = QVBoxLayout()
         left_layout.addWidget(l1)
@@ -73,27 +74,32 @@ class BasketWidget(QWidget):
         # SIGNALS
         self.model.total.connect(lambda total: self.amount_label.setText("${}".format(total)))
         self.table.clicked.connect(self.on_clicked_row)
-        edit_btn.clicked.connect(self.select_amount)
-        del_btn.clicked.connect(self.delete_item)
+        self.edit_btn.clicked.connect(self.select_amount)
+        self.del_btn.clicked.connect(self.delete_item)
         confirm_btn.clicked.connect(self.open_payment_dialog)
 
         # PROPS
         self.selected_row = None
+        self.edit_btn.setEnabled(False)
+        self.del_btn.setEnabled(False)
         
     def on_clicked_row(self, index):
         self.selected_row = index.row()
+        if not self.edit_btn.isEnabled():
+            self.edit_btn.setEnabled(True)
+            self.del_btn.setEnabled(True)
 
     def select_amount(self):
         row = self.selected_row
         if row != None:
             product = self.model._data[row][1]
-            amount = self.model._data[row][3]
+            amount = self.model._data[row][4]
             dlg = SetAmountDialog(product, amount)
             dlg.amount.connect(lambda amount: self.update_amount(row, amount))
             dlg.exec()
 
     def update_amount(self, row, amount):
-        self.model._data[row][3] = amount
+        self.model._data[row][4] = amount
         self.model.calculate_total()
         self.model.layoutChanged.emit()
 
@@ -101,6 +107,9 @@ class BasketWidget(QWidget):
         row = self.selected_row
         if row != None:
             del(self.model._data[row])
+            self.del_btn.setEnabled(False)
+            self.edit_btn.setEnabled(False)
+            self.table.clearSelection()
             self.model.calculate_total()
             self.model.layoutChanged.emit()
 
@@ -108,9 +117,14 @@ class BasketWidget(QWidget):
         if len(self.model._data) > 0:
             amount = self.amount_label.text()
             amount = amount[1:]
+            print("AMOUNT")
+            print(amount)
             productsamount = []
             for row in self.model._data:
-                productamount_str = "{} x {}".format(row[3], row[1])
+                full_product_name = row[2] + " " + row[1]
+                full_product_name = full_product_name.strip()
+                product_amount = row[4]
+                productamount_str = "{} x {}".format(product_amount,full_product_name)
                 productsamount.append(productamount_str)
             dlg = RegisterPaymentDialog(productsamount=productsamount,amount=amount)
             dlg.data.connect(self.save_payment)
@@ -123,6 +137,7 @@ class BasketWidget(QWidget):
         if successful_payment and successful_stock_update:
             self.model.reset_basket()
             self.model.layoutChanged.emit()
+            self.payment_saved.emit()
             QMessageBox.information(self, "Registro exitoso", "Pago registrado correctamente")
         else:
             QMessageBox.critical(self, "Registro fallido", "Ha ocurrido un error. Contacte al administrador.")

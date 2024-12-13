@@ -39,7 +39,7 @@ class ProductsWindow(QWidget):
         self.model.get_all_prodcuts()
         self.edit_product_btn.setEnabled(False)
         self.delete_product_btn.setEnabled(False)
-        self.menu.go_to_products_btn.hide()
+        self.menu.go_to_products_btn.setEnabled(False)
         title.setStyleSheet("font-size: 30px; font-weight: bold")
         self.selected_row = -1
 
@@ -88,7 +88,6 @@ class ProductsWindow(QWidget):
     def on_clicked_row(self, index):
         self.selected_row = index.row()
         if self.selected_row > -1:
-            print("SELECTED ROW")
             if not self.edit_product_btn.isEnabled():
                 self.toggle_btns_state()
     

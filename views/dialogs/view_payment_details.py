@@ -15,7 +15,6 @@ class ViewPaymentDetailsDialog(QDialog):
         timestamp = payment_data["timestamp"]
         date = timestamp[0:10]
 
-
         self.date_label = QLabel("Fecha: " + date)
         self.quantity_label = QLabel("Cantidad: " + str(payment_data["amount"]))
         self.payment_form_label = QLabel("Forma de pago: " + payment_data["payment_form"])
@@ -37,8 +36,9 @@ class ViewPaymentDetailsDialog(QDialog):
         con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         productpayments = cur.execute("""
-            SELECT * FROM productpayment_test WHERE payment_id = {}
-        """.format(payment_id)).fetchall()
+            SELECT * FROM productpayment_test WHERE payment_id = ?
+        """, (payment_id,)).fetchall()
+        print(productpayments)
         text_lines = []
         for productpayment in productpayments:
             product_name = productpayment[3]

@@ -5,10 +5,14 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDoubleSpinBox,
     QLineEdit,
-    QDialogButtonBox
+    QLabel,
+    QDialogButtonBox,
+    QMessageBox
 )
 from PySide6.QtCore import Signal
 from PySide6.QtSql import QSqlQuery
+from utils import Paths, product_categories
+import sqlite3
 
 class EditItemDialog(QDialog):
     item_edited = Signal()
@@ -21,19 +25,27 @@ class EditItemDialog(QDialog):
 
         form = QFormLayout()
         self.name_input = QLineEdit()
+        self.brand_input = QLineEdit()
         self.price_input = QDoubleSpinBox()
         self.price_input.setRange(0,9999)
         self.category_input = QComboBox()
-        self.category_input.addItems(["-- SELECCIONAR --","Dulce", "Chocolate", "Papas", "Desechable", "Decoración", "Piñata"])
+        self.category_input.addItems(product_categories)
         self.code_input = QLineEdit()
         form.addRow("Nombre", self.name_input)
+        form.addRow("Marca", self.brand_input)
         form.addRow("Precio", self.price_input)
         form.addRow("Categoría", self.category_input)
         form.addRow("Código", self.code_input)
 
+        self.msgs_label = QLabel()
+
         button_box = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Save)
         button_box.accepted.connect(self.validate_input)
         button_box.rejected.connect(self.close)
+
+        self.msgs_label.hide()
+        self.msgs_label.setStyleSheet("color: red;")
+        
 
         self.load_item_data()
 
@@ -44,30 +56,43 @@ class EditItemDialog(QDialog):
         self.setLayout(layout)
 
     def load_item_data(self):
-        query = QSqlQuery(db=self.db)
-        query.prepare("""
+        con = sqlite3.connect(Paths.db())
+        cur = con.cursor()
+        query = """
             SELECT * FROM product_test WHERE id = (?)
-        """)
-        query.addBindValue(self.product_id)
-        
-        if query.exec():
-            while query.next():
-                self.name_input.setText(query.value(1))
-                self.price_input.setValue(query.value(2))
-                self.category_input.setCurrentText(query.value(3))
-                self.code_input.setText(str(query.value(4)))
+        """
+        product_data = cur.execute(query, self.product_id).fetchone()
+
+        if product_data:        
+            self.name_input.setText(product_data[0])
+            self.brand_input.setText(product_data[1])
+            self.price_input.setValue(product_data[2])
+            self.category_input.setCurrentText(product_data[3])
+            self.code_input.setText(product_data[4])
         else:
-            print("ERROR")
+            QMessageBox.information(self, "Error en Búsqueda", "No se encontraron los datos correspondientes al producto.")
 
     def validate_input(self):
+        self.msgs_label.hide()
         name = self.name_input.text()
+        brand = self.brand_input.text()
         price = self.price_input.value()
         category = self.category_input.currentText()
         code = self.code_input.text()
-        if name and price > 0 and category != "-- SELECCIONAR --":
-            name = name.capitalize()
+        
+        msgs= []
+        if not name:
+            msgs.append("Agregue el nombre del producto")
+        if price == 0:
+            msgs.append("Agregue un precio válido")
+        if category == product_categories[0]:
+            msgs.append("Seleccione una categoría válida")
+        if len(msgs)== 0:
+            name = name.lower()
+            brand = brand.lower()
             item_data = {
                 "name": name,
+                "brand": brand,
                 "price": price,
                 "category": category,
                 "code": code
@@ -75,29 +100,28 @@ class EditItemDialog(QDialog):
             self.save(item_data)
 
     def save(self, item_data):
+        con = sqlite3.connect(Paths.db())
+        cur = con.cursor()
+
         name = item_data["name"]
+        brand = item_data["brand"]
         price = item_data["price"]
         category = item_data["category"]
         code = item_data["code"]
         if not code:
             code = None
-        query = QSqlQuery(db=self.db)
-        query.prepare("""
+        query = """
             UPDATE product_test
-            SET name = ?, price = ?, category = ?,code = ?
+            SET name = ?, brand = ?, price = ?, category = ?,code = ?
             WHERE id = ?
-        """)
-        query.addBindValue(name)
-        query.addBindValue(price)
-        query.addBindValue(category)
-        query.addBindValue(code)
-        query.addBindValue(self.product_id)
-
-        if query.exec():
+        """
+        cur.execute(query, (name, brand, price, category, code, self.product_id))
+        success = con.commit()
+        if success:
             self.item_edited.emit()
             self.close()
         else:
-            print(query.lastError().text())
+            QMessageBox.information(self, "Error", "Ha habido un error al guardar los datos. Comuníquese con el administrador.")
     
     
         

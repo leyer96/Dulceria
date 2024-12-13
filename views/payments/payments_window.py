@@ -45,7 +45,7 @@ class PaymentsWindow(QWidget):
             self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
             self.table.setSelectionMode(QAbstractItemView.SingleSelection)
             self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-            self.menu.go_to_payments_btn.hide()
+            self.menu.go_to_payments_btn.setEnabled(False)
             self.view_details_btn.setEnabled(False)
             title.setStyleSheet("font-size: 30px; font-weight: bold")   
             # SIGNALS
@@ -87,6 +87,10 @@ class PaymentsWindow(QWidget):
                   }
                   dlg = ViewPaymentDetailsDialog(payment_data)
                   dlg.exec()
+            
+      def to_default(self):
+            self.model.get_todays_payment()
+            self.search_widget.to_default()
 
       def open_select_export_data_dialog(self):
             is_query = False

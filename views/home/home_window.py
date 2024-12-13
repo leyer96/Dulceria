@@ -20,11 +20,13 @@ class HomeWindow(QWidget):
 
         # SIGNALS
         self.search_widget.search_btn.clicked.connect(self.handle_search)
+        self.search_widget.search_btn.clicked.connect(lambda: self.search_box.add_btn.setEnabled(False))
         self.search_widget.search_input.returnPressed.connect(self.handle_search)
+        self.search_widget.search_input.returnPressed.connect(lambda: self.search_box.add_btn.setEnabled(False))
         self.search_box.item_data.connect(self.checkout.model.load_item)
         
         # CONFIG
-        self.menu.go_to_home_btn.hide()
+        self.menu.go_to_home_btn.setEnabled(False)
         
         # LAYOUT
         grid = QGridLayout()

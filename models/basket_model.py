@@ -5,13 +5,13 @@ class BasketModel(QAbstractTableModel):
     def __init__(self):
         super().__init__()
         self._data = []
-        self.headers = ["ID", "Producto", "Precio", "Cantidad"]
+        self.headers = ["ID", "Producto", "Marca", "Precio", "Cantidad"]
 
     def rowCount(self,index):
         return len(self._data)
     
     def columnCount(self,index):
-        return 4
+        return len(self.headers)
     
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -30,7 +30,7 @@ class BasketModel(QAbstractTableModel):
     def calculate_total(self):
         total = 0
         for item in self._data:
-            total += item[3]*int(item[2])
+            total += item[3]*int(item[4])
         self.total.emit(total)
 
     def reset_basket(self):

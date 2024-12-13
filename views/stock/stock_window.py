@@ -15,7 +15,8 @@ from views.home.search_widget import SearchWidget
 from models.stock_model import StockModel
 from models.batch_model import BatchModel
 from views.dialogs.add_batch import AddBatchDialog
-from utils import Paths, toggle_btns_state
+from utils import Paths, toggle_btns_state, date_format
+from datetime import datetime
 
 class StockWindow(QWidget):
     def __init__(self, db, menu):
@@ -38,18 +39,18 @@ class StockWindow(QWidget):
         self.stock_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.stock_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.stock_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.stock_model.get_all_stock()
 
         self.batch_table.setModel(self.batch_model)
         self.batch_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.batch_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.batch_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.batch_table.clicked.connect(self.on_clicked_row)
-        self.batch_model.get_all_batchs()
 
         self.selected_row = -1
         self.resolve_batch_btn.setEnabled(False)
-        self.menu.go_to_stock_btn.hide()
+        self.menu.go_to_stock_btn.setEnabled(False)
+
+        
         stock_title.setStyleSheet("font-size: 30px; font-weight: bold")
 
          # SIGNALS
@@ -59,7 +60,6 @@ class StockWindow(QWidget):
         self.search_widget.search_input.returnPressed.connect(lambda: self.resolve_batch_btn.setEnabled(False))
         add_batch_btn.clicked.connect(self.open_add_batch_dialog)
         self.resolve_batch_btn.clicked.connect(self.resolve_batch)
-        # self.model.success.connect(self.toggle_btns_state)
         
         # LAYOUT
         buttons_layout = QHBoxLayout()
@@ -70,7 +70,7 @@ class StockWindow(QWidget):
         grid.addWidget(stock_title, 0, 0, 1, 12)
         grid.addWidget(self.search_widget, 1, 0, 1, 9)
         grid.addWidget(self.stock_table, 2, 0, 4, 9)
-        grid.addWidget(batch_title, 6, 0, 1, 9)
+        grid.addWidget(batch_title, 6, 0, 1, 4)
         grid.addWidget(self.batch_table, 7, 0, 4, 9)
         grid.addLayout(buttons_layout, 11, 0, 1, 9)
         grid.addWidget(self.menu, 2, 9, 5, 3)

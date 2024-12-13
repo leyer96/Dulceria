@@ -12,6 +12,7 @@ class MainWindow(QMainWindow):
         self.resize(700, 500)
  
         windows = [HomeWindow, ProductsWindow, PaymentsWindow, StockWindow]
+        initialized_window = []
 
         container = QWidget()
         container_layout = QStackedLayout()
@@ -23,7 +24,21 @@ class MainWindow(QMainWindow):
             menu.go_to_payments.connect(lambda: container_layout.setCurrentIndex(2))
             menu.go_to_stock.connect(lambda: container_layout.setCurrentIndex(3))
             w = window(db, menu)
+
+            initialized_window.append(w)
             container_layout.addWidget(w)
+
+        for i in range(0, len(initialized_window)):
+            for j in range(0,len(initialized_window)):
+                if i == j:
+                    continue
+                wi = initialized_window[i]
+                wj = initialized_window[j]
+                if isinstance(wi, StockWindow):
+                    wj.menu.go_to_stock.connect(wi.stock_model.get_all_stock)
+                    wj.menu.go_to_stock.connect(wi.batch_model.get_all_batchs)
+                if isinstance(wi, PaymentsWindow):
+                    wj.menu.go_to_payments.connect(wi.to_default)
 
         container.setLayout(container_layout)
         

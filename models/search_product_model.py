@@ -9,14 +9,22 @@ class SearchModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Id", "Producto", "Precio", "Categoría", "Código"]
+        self.headers = ["Id", "Producto", "Marca", "Precio", "Categoría", "Código"]
         self.filter = None
+    
+    def data(self, index, role):
+        value = super().data(index, Qt.DisplayRole)
+        if role == Qt.DisplayRole:
+            if index.column() == 1 or index.column() == 2:
+                capitalized_value = value.capitalize()
+                return capitalized_value
+            return value
     
     def search(self, search_str, filter):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT id, name, price, category, code FROM product_test
+            SELECT id, name, brand, price, category, code FROM product_test
             WHERE {} LIKE '%{}%'
         """.format(filter, search_str)
         Qquery = QSqlQuery(query, db=self.db)
@@ -34,7 +42,7 @@ class SearchModel(QSqlQueryModel):
     def refresh_table(self):
         if self.filter:
             query = """
-                SELECT id, name, price, category, code FROM product_test
+                SELECT id, name, brand, price, category, code FROM product_test
                 WHERE {} LIKE '%{}%'
                 ORDER BY NAME
                 LIMIT 50

@@ -7,8 +7,8 @@ from PySide6.QtWidgets import (
     QTextEdit,
     QDialogButtonBox
 )
-
 from PySide6.QtCore import Signal
+from utils import default_cb_str
 
 class RegisterPaymentDialog(QDialog):
     data = Signal(dict)
@@ -24,7 +24,7 @@ class RegisterPaymentDialog(QDialog):
 
         form = QFormLayout()
         self.payment_form_input = QComboBox()
-        self.payment_form_input.addItems(["-- SELECCIONAR --","Tarjeta","Efectivo","Otro"])
+        self.payment_form_input.addItems([default_cb_str,"Tarjeta","Efectivo","Otro"])
         self.note = QTextEdit()
         form.addRow("Forma de Pago", self.payment_form_input)
         form.addRow("Nota", self.note)
@@ -50,7 +50,7 @@ class RegisterPaymentDialog(QDialog):
         self.reset_message()
         payment_form = self.payment_form_input.currentText()
         note = self.note.toPlainText()
-        if payment_form != "-- SELECCIONAR --":
+        if payment_form != default_cb_str:
             if payment_form == "Otro" and not note:
                 error_message = "Agregue una nota describiendo la forma de pago"
                 self.message_label.setText(error_message)
