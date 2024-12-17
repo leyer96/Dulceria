@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import (
     QCheckBox,
-    QComboBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -9,8 +8,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget
     )
-from PySide6.QtGui import QIcon
-from utils import Paths, default_cb_str
+from PySide6.QtGui import QIcon, QCursor
+from PySide6.QtCore import Qt
+from utils import Paths
 
 
 class SearchWidget(QWidget):
@@ -20,6 +20,7 @@ class SearchWidget(QWidget):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Buscar Producto")
         self.search_btn = QPushButton()
+        self.search_btn.setCursor(QCursor(Qt.PointingHandCursor))
         search_btn_icon = QIcon(Paths.icon("application-search-result.png"))
         self.search_btn.setIcon(search_btn_icon)
         self.search_checkbox = QCheckBox("Consultar")

@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox
     )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QCursor
 from models.basket_model import BasketModel
 from views.dialogs.set_amount import SetAmountDialog
 from views.dialogs.register_payment import RegisterPaymentDialog
@@ -81,7 +81,10 @@ class BasketWidget(QWidget):
         # PROPS
         self.selected_row = None
         self.edit_btn.setEnabled(False)
+        self.edit_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.del_btn.setEnabled(False)
+        self.del_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        confirm_btn.setCursor(QCursor(Qt.PointingHandCursor))
         
     def on_clicked_row(self, index):
         self.selected_row = index.row()

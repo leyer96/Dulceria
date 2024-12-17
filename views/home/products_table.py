@@ -7,10 +7,8 @@ from PySide6.QtWidgets import (
     QWidget,
     QHeaderView
 )
-# from PySide6.QtGui import QPalette, QColor
-from PySide6.QtSql import  QSqlQuery
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QCursor
 from utils import Paths
 from views.dialogs.set_amount import SetAmountDialog
 from views.dialogs.edit_product import EditItemDialog
@@ -53,6 +51,7 @@ class SearchBox(QWidget):
         # PROPS
         self.selected_row = None
         self.add_btn.setEnabled(False)
+        self.add_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.setLayout(layout)
 
     def on_clicked_row(self, index):
@@ -63,17 +62,17 @@ class SearchBox(QWidget):
     def select_amount(self):
         row = self.selected_row
         if row != None:
-            product = self.model.data(self.model.index(row, 1))
+            product = self.model.data(self.model.index(row, 1), Qt.DisplayRole)
             dlg = SetAmountDialog(product)
             dlg.amount.connect(self.emit_item_data)
             dlg.exec()
 
     def emit_item_data(self, amount):
         row = self.selected_row
-        id = self.model.data(self.model.index(row, 0))
-        product = self.model.data(self.model.index(row, 1))
-        brand = self.model.data(self.model.index(row, 2))
-        price = self.model.data(self.model.index(row, 3))
+        id = self.model.data(self.model.index(row, 0), Qt.DisplayRole)
+        product = self.model.data(self.model.index(row, 1), Qt.DisplayRole)
+        brand = self.model.data(self.model.index(row, 2), Qt.DisplayRole)
+        price = self.model.data(self.model.index(row, 3), Qt.DisplayRole)
         item_data = [id, product, brand, price, amount]
         self.item_data.emit(item_data)
         

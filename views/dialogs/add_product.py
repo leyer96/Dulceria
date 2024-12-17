@@ -7,10 +7,8 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QLineEdit,
     QDialogButtonBox,
-    QMessageBox,
 )
 from PySide6.QtCore import Signal
-from PySide6.QtSql import QSqlQuery
 from utils import Paths, product_categories
 import sqlite3
 

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QPushButton, QVBoxLayout
 from PySide6.QtCore import Signal, Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QCursor
 from utils import Paths
 
 class Menu(QWidget):
@@ -21,7 +21,13 @@ class Menu(QWidget):
         self.go_to_home_btn.clicked.connect(self.go_to_home.emit)
         self.go_to_stock_btn.clicked.connect(self.go_to_stock)
         self.go_to_payments_btn.clicked.connect(self.go_to_payments.emit)
-        self.go_to_admin_window_btn.clicked.connect(self.go_to_admin.emit)
+        
+        self.go_to_admin_window_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.go_to_products_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.go_to_home_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.go_to_stock_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.go_to_payments_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.go_to_admin_window_btn.setCursor(QCursor(Qt.PointingHandCursor))
 
         layout = QVBoxLayout()
         layout.addWidget(self.go_to_home_btn)
