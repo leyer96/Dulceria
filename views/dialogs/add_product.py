@@ -95,7 +95,8 @@ class AddItemDialog(QDialog):
                 INSERT INTO product_test (name, brand, price, category, code) VALUES(?,?,?,?,?)
             """, (name, brand, price, category, code))
             con.commit()
-        except:
+        except sqlite3.Error as e:
+            print(e)
             self.message_label.setText("Ya existe un producto con este nombre. Modifique el producto o elimínelo.")
             self.message_label.show()
         else:
@@ -105,11 +106,12 @@ class AddItemDialog(QDialog):
                     INSERT INTO stock_test (product_id, product)
                     VALUES(?, ?)
                 """, (product_id, name))
-                con.commit()
-            except:
+            except sqlite3.Error as e:
+                print(e)
                 self.message_label.setText("Ha habido un error al generar stock. Intente de nuevo. Si el problema persiste, contacte al administratodr.")
                 self.message_label.show()
             else:
+                con.commit()
                 self.saved.emit()
                 self.close()
 

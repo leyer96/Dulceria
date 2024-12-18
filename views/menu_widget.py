@@ -21,6 +21,7 @@ class Menu(QWidget):
         self.go_to_home_btn.clicked.connect(self.go_to_home.emit)
         self.go_to_stock_btn.clicked.connect(self.go_to_stock)
         self.go_to_payments_btn.clicked.connect(self.go_to_payments.emit)
+        self.go_to_admin_window_btn.clicked.connect(self.go_to_admin.emit)
         
         self.go_to_admin_window_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.go_to_products_btn.setCursor(QCursor(Qt.PointingHandCursor))

@@ -14,8 +14,10 @@ class ViewPaymentDetailsDialog(QDialog):
 
         timestamp = payment_data["timestamp"]
         date = timestamp[0:10]
+        time = timestamp[10:len(timestamp)]
 
         self.date_label = QLabel("Fecha: " + date)
+        self.time_label = QLabel("Hora: " + time)
         self.quantity_label = QLabel("Cantidad: " + str(payment_data["amount"]))
         self.payment_form_label = QLabel("Forma de pago: " + payment_data["payment_form"])
         l1 = QLabel("Productos: ")
@@ -25,6 +27,7 @@ class ViewPaymentDetailsDialog(QDialog):
 
         layout = QVBoxLayout()
         layout.addWidget(self.date_label)
+        layout.addWidget(self.time_label)
         layout.addWidget(self.quantity_label)
         layout.addWidget(self.payment_form_label)
         layout.addWidget(l1)
@@ -38,7 +41,6 @@ class ViewPaymentDetailsDialog(QDialog):
         productpayments = cur.execute("""
             SELECT * FROM productpayment_test WHERE payment_id = ?
         """, (payment_id,)).fetchall()
-        print(productpayments)
         text_lines = []
         for productpayment in productpayments:
             product_name = productpayment[3]

@@ -64,7 +64,8 @@ class SearchBox(QWidget):
         if row != None:
             product = self.model.data(self.model.index(row, 1), Qt.DisplayRole)
             dlg = SetAmountDialog(product)
-            dlg.amount.connect(self.emit_item_data)
+            dlg.float_amount.connect(self.emit_item_data)
+            dlg.int_amount.connect(self.emit_item_data)
             dlg.exec()
 
     def emit_item_data(self, amount):

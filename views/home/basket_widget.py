@@ -72,7 +72,7 @@ class BasketWidget(QWidget):
         self.setLayout(layout)        
 
         # SIGNALS
-        self.model.total.connect(lambda total: self.amount_label.setText("${}".format(total)))
+        self.model.total_calculated.connect(lambda total: self.amount_label.setText("${}".format(total)))
         self.table.clicked.connect(self.on_clicked_row)
         self.edit_btn.clicked.connect(self.select_amount)
         self.del_btn.clicked.connect(self.delete_item)
@@ -97,8 +97,9 @@ class BasketWidget(QWidget):
         if row != None:
             product = self.model._data[row][1]
             amount = self.model._data[row][4]
-            dlg = SetAmountDialog(product, amount)
-            dlg.amount.connect(lambda amount: self.update_amount(row, amount))
+            dlg = SetAmountDialog(product, amount, True)
+            dlg.int_amount.connect(lambda amount: self.update_amount(row, amount))
+            dlg.float_amount.connect(lambda amount: self.update_amount(row, amount))
             dlg.exec()
 
     def update_amount(self, row, amount):
@@ -118,15 +119,14 @@ class BasketWidget(QWidget):
 
     def open_payment_dialog(self):
         if len(self.model._data) > 0:
-            amount = self.amount_label.text()
-            amount = amount[1:]
-            print("AMOUNT")
-            print(amount)
+            amount = self.model.total
             productsamount = []
             for row in self.model._data:
                 full_product_name = row[2] + " " + row[1]
                 full_product_name = full_product_name.strip()
                 product_amount = row[4]
+                if type(product_amount) == float:
+                    product_amount = f"{product_amount} gr."
                 productamount_str = "{} x {}".format(product_amount,full_product_name)
                 productsamount.append(productamount_str)
             dlg = RegisterPaymentDialog(productsamount=productsamount,amount=amount)
@@ -140,6 +140,9 @@ class BasketWidget(QWidget):
         if successful_payment and successful_stock_update:
             self.model.reset_basket()
             self.model.layoutChanged.emit()
+            self.table.clearSelection()
+            self.del_btn.setEnabled(False)
+            self.edit_btn.setEnabled(False)
             self.payment_saved.emit()
             QMessageBox.information(self, "Registro exitoso", "Pago registrado correctamente")
         else:

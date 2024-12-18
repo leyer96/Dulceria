@@ -108,12 +108,14 @@ class AddBatchDialog(QDialog):
                 cur.execute(""" 
                     INSERT INTO batch_test (product_id, stock_id, product, amount, expiration_date) VALUES (?, ?, ?, ?, ?)
                     """, (product_id, stock_id, product, amount, date_str))
-            except:
+            except sqlite3.Error as e:
+                print(e)
                 self.message_label.setText("Ha ocurrido un error. Contacte al administrador.")
             else:
                 con.commit()
                 self.saved.emit()
                 self.close()
-        except:
+        except sqlite3.Error as e:
+            print(e)
             self.message_label.setText("Ha ocurrido un error. Contacte al administrador.")
         

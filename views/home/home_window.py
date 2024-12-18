@@ -48,3 +48,6 @@ class HomeWindow(QWidget):
         else:
             pass
         self.search_box.model.search(str, filter)
+
+    def load_settings(self):
+        pass

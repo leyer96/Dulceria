@@ -15,7 +15,7 @@ from views.home.search_widget import SearchWidget
 from models.stock_model import StockModel
 from models.batch_model import BatchModel
 from views.dialogs.add_batch import AddBatchDialog
-from utils import Paths, toggle_btns_state, date_format
+from utils import Paths, toggle_btns_state, load_settings
 from datetime import datetime
 
 class StockWindow(QWidget):
@@ -31,7 +31,7 @@ class StockWindow(QWidget):
         self.batch_model = BatchModel(db)
         stock_title = QLabel("Stock")
         batch_title = QLabel("Lotes")
-        add_batch_btn = QPushButton(QIcon(Paths.icon("plus-button.png")),"Agregar Lote")
+        self.add_batch_btn = QPushButton(QIcon(Paths.icon("plus-button.png")),"Agregar Lote")
         self.resolve_batch_btn = QPushButton(QIcon(Paths.icon("blue-document-task.png")), "Resolver")
         
         # CONFIG
@@ -58,12 +58,12 @@ class StockWindow(QWidget):
         self.search_widget.search_btn.clicked.connect(lambda: self.resolve_batch_btn.setEnabled(False))
         self.search_widget.search_input.returnPressed.connect(self.handle_search)
         self.search_widget.search_input.returnPressed.connect(lambda: self.resolve_batch_btn.setEnabled(False))
-        add_batch_btn.clicked.connect(self.open_add_batch_dialog)
+        self.add_batch_btn.clicked.connect(self.open_add_batch_dialog)
         self.resolve_batch_btn.clicked.connect(self.resolve_batch)
         
         # LAYOUT
         buttons_layout = QHBoxLayout()
-        buttons_layout.addWidget(add_batch_btn)
+        buttons_layout.addWidget(self.add_batch_btn)
         buttons_layout.addWidget(self.resolve_batch_btn)
 
         grid = QGridLayout()
@@ -76,6 +76,8 @@ class StockWindow(QWidget):
         grid.addWidget(self.menu, 2, 9, 5, 3)
         
         self.setLayout(grid)
+
+        self.load_settings()
         
     def handle_search(self):
         str = self.search_widget.search_input.text()
@@ -111,3 +113,14 @@ class StockWindow(QWidget):
         if row > -1:
             batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
             self.batch_model.update_batch_show_status(batch_id)
+
+    def load_settings(self):
+        settings = load_settings()
+        if not settings["permissions"]["stock_window"]["add"]:
+            self.add_batch_btn.hide()
+        else:
+            self.add_batch_btn.show()
+        if not settings["permissions"]["stock_window"]["resolve"]:
+            self.resolve_batch_btn.hide()
+        else:
+            self.resolve_batch_btn.show()

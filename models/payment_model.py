@@ -1,10 +1,12 @@
 from PySide6.QtSql import QSqlQueryModel, QSqlQuery
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 import sqlite3
 from datetime import datetime, timedelta
 from utils import Paths
 
 class PaymentModel(QSqlQueryModel):
+    error = Signal()
+    success = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -35,10 +37,15 @@ class PaymentModel(QSqlQueryModel):
     def search(self, search_str, filter):
         query = """
             SELECT (id, timestamp, payment_form, amount, note) FROM payment_test
-            WHERE {} LIKE '%{}%'
-        """.format(filter, search_str)
-        Qquery = QSqlQuery(query, db=self.db)
-        self.setQuery(Qquery)
+            WHERE {} LIKE :search_str
+        """.format(filter)
+        Qquery = QSqlQuery(db=self.db)
+        Qquery.prepare(query)
+        Qquery.bindValue(":search_str", f"%{search_str}%")
+        if not Qquery.execute():
+            self.error.emit()
+        else:
+            self.setQuery(Qquery)
                
     def get_todays_payment(self):
         today_date_str = datetime.today().strftime("%Y-%m-%d")
@@ -49,7 +56,6 @@ class PaymentModel(QSqlQueryModel):
             WHERE timestamp BETWEEN '{}' AND '{}'
         """.format(today_date_str, tomorrow_date_str)
         Qquery = QSqlQuery(query, db=self.db)
-        print(Qquery.lastQuery())
         self.setQuery(Qquery)
     
     def get_all_payments(self):
@@ -70,6 +76,5 @@ class PaymentModel(QSqlQueryModel):
             BETWEEN '{}' AND '{}'
         """.format(start_date_str, end_date_str)
         Qquery = QSqlQuery(query, db=self.db)
-        print(Qquery.lastQuery())
         self.setQuery(Qquery)
         

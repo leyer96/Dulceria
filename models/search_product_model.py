@@ -25,10 +25,15 @@ class SearchModel(QSqlQueryModel):
         self.filter = filter
         query = """
             SELECT id, name, brand, price, category, code FROM product_test
-            WHERE {} LIKE '%{}%'
-        """.format(filter, search_str)
-        Qquery = QSqlQuery(query, db=self.db)
-        self.setQuery(Qquery)
+            WHERE {} LIKE :search_str
+        """.format(filter)
+        Qquery = QSqlQuery(db=self.db)
+        Qquery.prepare(query)
+        Qquery.bindValue(":search_str", f"%{search_str}%")
+        if not Qquery.exec():
+            self.error.emit()
+        else:
+            self.setQuery(Qquery)
 
     def get_all_prodcuts(self):
         query = """
@@ -43,12 +48,17 @@ class SearchModel(QSqlQueryModel):
         if self.filter:
             query = """
                 SELECT id, name, brand, price, category, code FROM product_test
-                WHERE {} LIKE '%{}%'
+                WHERE {} LIKE :search_str
                 ORDER BY NAME
                 LIMIT 50
-            """.format(self.filter, self.search_str)
-            Qquery = QSqlQuery(query, db=self.db)
-            self.setQuery(Qquery)
+            """.format(self.filter)
+            Qquery = QSqlQuery(db=self.db)
+            Qquery.prepare(query)
+            Qquery.bindValue(":search_str", f"%{self.search_str}%")
+            if not Qquery.exec():
+                self.error.emit()
+            else:
+                self.setQuery(Qquery)
         else:
             query = """
             SELECT * FROM product_test
@@ -65,10 +75,11 @@ class SearchModel(QSqlQueryModel):
             cur.execute("""
                 DELETE FROM product_test WHERE id=?
             """,(product_id,))
-            con.commit()
-        except:
+        except sqlite3.Error as e:
+            print(e)
             self.error.emit()
         else:
+            con.commit()
             self.success.emit()
             self.refresh_table()
 

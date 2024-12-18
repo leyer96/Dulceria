@@ -4,6 +4,7 @@ from views.menu_widget import Menu
 from views.products.products_window import ProductsWindow
 from views.payments.payments_window import PaymentsWindow
 from views.stock.stock_window import StockWindow
+from views.admin.admin_window import AdminWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, db):
@@ -11,7 +12,7 @@ class MainWindow(QMainWindow):
 
         self.resize(700, 500)
  
-        windows = [HomeWindow, ProductsWindow, PaymentsWindow, StockWindow]
+        windows = [HomeWindow, ProductsWindow, PaymentsWindow, StockWindow, AdminWindow]
         initialized_window = []
 
         container = QWidget()
@@ -23,6 +24,7 @@ class MainWindow(QMainWindow):
             menu.go_to_products.connect(lambda: container_layout.setCurrentIndex(1))
             menu.go_to_payments.connect(lambda: container_layout.setCurrentIndex(2))
             menu.go_to_stock.connect(lambda: container_layout.setCurrentIndex(3))
+            menu.go_to_admin.connect(lambda: container_layout.setCurrentIndex(4))
             w = window(db, menu)
 
             initialized_window.append(w)
@@ -39,6 +41,9 @@ class MainWindow(QMainWindow):
                     wj.menu.go_to_stock.connect(wi.batch_model.get_all_batchs)
                 if isinstance(wi, PaymentsWindow):
                     wj.menu.go_to_payments.connect(wi.to_default)
+                if isinstance(wi, AdminWindow):
+                    wi.new_settings.connect(wj.load_settings)
+                    wj.menu.go_to_admin.connect(wi.hide_content)
 
         container.setLayout(container_layout)
         

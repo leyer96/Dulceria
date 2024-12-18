@@ -21,7 +21,7 @@ class EditItemDialog(QDialog):
 
         self.db = db
 
-        self.product_id = product_id
+        self.product_id = str(product_id)
 
         form = QFormLayout()
         self.name_input = QLineEdit()
@@ -59,16 +59,15 @@ class EditItemDialog(QDialog):
         con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         query = """
-            SELECT * FROM product_test WHERE id = (?)
+            SELECT * FROM product_test WHERE id = ?
         """
         product_data = cur.execute(query, self.product_id).fetchone()
-
         if product_data:        
-            self.name_input.setText(product_data[0])
-            self.brand_input.setText(product_data[1])
-            self.price_input.setValue(product_data[2])
-            self.category_input.setCurrentText(product_data[3])
-            self.code_input.setText(product_data[4])
+            self.name_input.setText(product_data[1])
+            self.brand_input.setText(product_data[2])
+            self.price_input.setValue(product_data[3])
+            self.category_input.setCurrentText(product_data[4])
+            self.code_input.setText(product_data[5])
         else:
             QMessageBox.information(self, "Error en Búsqueda", "No se encontraron los datos correspondientes al producto.")
 
@@ -100,6 +99,7 @@ class EditItemDialog(QDialog):
             self.save(item_data)
 
     def save(self, item_data):
+        print(item_data)
         con = sqlite3.connect(Paths.db())
         cur = con.cursor()
 
@@ -115,13 +115,15 @@ class EditItemDialog(QDialog):
             SET name = ?, brand = ?, price = ?, category = ?,code = ?
             WHERE id = ?
         """
-        cur.execute(query, (name, brand, price, category, code, self.product_id))
-        success = con.commit()
-        if success:
+        try:
+            cur.execute(query, (name, brand, price, category, code, self.product_id))
+        except sqlite3.Error as e:
+            print(e)
+            QMessageBox.information(self, "Error", "Ha habido un error al guardar los datos. Comuníquese con el administrador.")
+        else:
+            con.commit()
             self.item_edited.emit()
             self.close()
-        else:
-            QMessageBox.information(self, "Error", "Ha habido un error al guardar los datos. Comuníquese con el administrador.")
     
     
         

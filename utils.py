@@ -4,7 +4,7 @@ class Paths:
     data = os.path.join(base, "data")
     icons = os.path.join(base, "resources/icons")  
     models = os.path.join(base, "models")
-    settings = os.path.join(base, "config")
+    settings = os.path.join(base, "settings")
     style = os.path.join(base, "resources/styles.qss")
     threads = os.path.join(base, "models/threads")
     views = os.path.join(base, "views")
@@ -121,11 +121,13 @@ def save_payment(payment_data, products):
     payment_form = payment_data["payment_form"]
     amount = payment_data["amount"]
     note = payment_data["note"]
+    timestamp = datetime.now()
     try:
         cur.execute("""
-            INSERT INTO payment_test (payment_form, amount, note) VALUES(?,?,?)
-                    """,(payment_form, amount, note))
-    except:
+            INSERT INTO payment_test (payment_form, amount, note, timestamp) VALUES(?,?,?,?)
+                    """,(payment_form, amount, note, timestamp))
+    except sqlite3.Error as e:
+        print(e)
         return False
     else:
         payment_id = cur.lastrowid
@@ -194,7 +196,7 @@ def substract_from_stock(products):
         amount = product[4]
         prev_amount = cur.execute("SELECT amount from stock_test where stock_test.product_id = ?", (product_id,)).fetchone()[0]
         if prev_amount > 0:
-            new_amount = prev_amount - amount
+            new_amount = int(prev_amount - amount)
             cur.execute("UPDATE stock_test SET amount = ? WHERE stock_test.product_id = ?", (new_amount, product_id))
         else:
             print("ERROR DE EMPAREJAMIENTO CON STOCK REAL")
@@ -210,6 +212,13 @@ def create_csv_file(data, headers, folder_path, filename):
         writer.writerow(field)
         for row in data:
             writer.writerow(row)
+
+# SETTINGS
+import json
+def load_settings():
+    with open(Paths.setting("settings.json"), "r") as f:
+        data = json.load(f)
+        return data
 
 # GLOBAL
 default_cb_str = "--SELECCIONAR--"

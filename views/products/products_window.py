@@ -15,7 +15,7 @@ from views.home.search_widget import SearchWidget
 from models.search_product_model import SearchModel
 from views.dialogs.add_product import AddItemDialog
 from views.dialogs.edit_product import EditItemDialog
-from utils import Paths
+from utils import Paths, load_settings
 
 class ProductsWindow(QWidget):
     def __init__(self, db, menu):
@@ -66,6 +66,8 @@ class ProductsWindow(QWidget):
         grid.addWidget(self.menu, 2, 9, 5, 3)
         
         self.setLayout(grid)
+
+        self.load_settings()
         
     def handle_search(self):
         if self.edit_product_btn.isEnabled():
@@ -100,7 +102,7 @@ class ProductsWindow(QWidget):
     
     def open_edit_dialog(self, row):
         if row != None:
-            product_id = self.model.data(self.model.index(row, 0))
+            product_id = self.model.data(self.model.index(row, 0), Qt.DisplayRole)
             dlg = EditItemDialog(self.db, product_id)
             dlg.item_edited.connect(self.model.refresh_table)
             dlg.item_edited.connect(self.toggle_btns_state)
@@ -120,3 +122,18 @@ class ProductsWindow(QWidget):
         else:
             self.edit_product_btn.setEnabled(True)
             self.delete_product_btn.setEnabled(True)
+
+    def load_settings(self):
+        settings = load_settings()
+        if not settings["permissions"]["products_window"]["add"]:
+            self.add_product_btn.hide()
+        else:
+            self.add_product_btn.show()
+        if not settings["permissions"]["products_window"]["edit"]:
+            self.edit_product_btn.hide()
+        else:
+            self.edit_product_btn.show()
+        if not settings["permissions"]["products_window"]["delete"]:
+            self.delete_product_btn.hide()
+        else:
+            self.delete_product_btn.show()

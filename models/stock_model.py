@@ -7,25 +7,36 @@ class StockModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Producto", "Categoría", "Cantidad en Stock"]
+        self.headers = ["Marca", "Producto", "Categoría", "Cantidad en Stock"]
         self.filter = None
     
+    def data(self, index, role):
+        value = super().data(index, Qt.DisplayRole)
+        if role == Qt.DisplayRole:
+            if index.column() == 0 or index.column() == 1:
+                    return value.capitalize()
+            return value
     def search(self, search_str, filter):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT stock_test.product, product_test.category, stock_test.amount FROM stock_test
+
+            SELECT product_test.brand, product_test.name, product_test.category, stock_test.amount FROM stock_test
             JOIN product_test ON stock_test.product_id = product_test.id
-            WHERE product_test.{} LIKE '%{}%'
+            WHERE product_test.{} LIKE :search_str
             ORDER BY stock_test.amount
-        """.format(filter, search_str)
-        Qquery = QSqlQuery(query, db=self.db)
-        print(Qquery.lastQuery())
-        self.setQuery(Qquery)
+        """.format(filter)
+        Qquery = QSqlQuery(db=self.db)
+        Qquery.prepare(query)
+        Qquery.bindValue(":search_str", f"%{search_str}%")
+        if not Qquery.exec():
+            self.error.emit()
+        else:
+            self.setQuery(Qquery)
 
     def get_all_stock(self):
         query = """
-            SELECT stock_test.product, product_test.category, stock_test.amount FROM stock_test
+            SELECT product_test.brand, product_test.name, product_test.category, stock_test.amount FROM stock_test
             JOIN product_test ON stock_test.product_id = product_test.id
             ORDER BY stock_test.amount
         """
@@ -35,13 +46,19 @@ class StockModel(QSqlQueryModel):
     def refresh_table(self):
         if self.filter:
             query = """
-            SELECT stock_test.product, product_test.category, stock_test.amount FROM stock_test
+            
+            SELECT product_test.brand, product_test.name, product_test.category, stock_test.amount FROM stock_test
             JOIN product_test ON stock_test.product_id = product_test.id
-            WHERE product_test.{} like '%{}%'
+            WHERE product_test.{} LIKE :search_str
             ORDER BY stock_test.amount
-        """.format(self.filter, self.search_str)
-            Qquery = QSqlQuery(query, db=self.db)
-            self.setQuery(Qquery)
+        """.format(self.filter)
+            Qquery = QSqlQuery(db=self.db)
+            Qquery.prepare(query)
+            Qquery.bindValue(":search_str", f"%{self.search_str}%")
+            if not Qquery.exec():
+                self.error.emit()
+            else:
+                self.setQuery(Qquery)
         else:
             self.get_all_stock()
 
