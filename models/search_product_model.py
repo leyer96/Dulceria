@@ -26,6 +26,7 @@ class SearchModel(QSqlQueryModel):
         query = """
             SELECT id, name, brand, price, category, code FROM product_test
             WHERE {} LIKE :search_str
+            LIMIT 50
         """.format(filter)
         Qquery = QSqlQuery(db=self.db)
         Qquery.prepare(query)

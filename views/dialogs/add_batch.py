@@ -7,9 +7,10 @@ from PySide6.QtWidgets import (
     QDateEdit,
     QVBoxLayout,
     QComboBox,
-    QRadioButton
+    QRadioButton,
+    QLineEdit
 )
-from PySide6.QtCore import QDate, QLocale, Signal
+from PySide6.QtCore import QDate, QLocale, Signal, Qt
 from utils import Paths
 import sqlite3
 
@@ -19,9 +20,13 @@ class AddBatchDialog(QDialog):
     def __init__(self):
         super().__init__()
 
+        self.codes = []
+
         self.product_input = QComboBox()
         self.product_input.addItem("")
         self.product_input.setEditable(True)
+
+        self.code_input = QLineEdit()
         
         self.amount_input = QSpinBox()
         self.amount_input.setRange(0,9999)
@@ -34,6 +39,7 @@ class AddBatchDialog(QDialog):
         
         form = QFormLayout()
         form.addRow("Producto:", self.product_input)
+        form.addRow("Código:", self.code_input)
         form.addRow("Cantidad:", self.amount_input)
         form.addRow("Fecha de Caducidad:", self.expiration_date_input)
         form.addRow("Sin caducidad", self.no_exipration_option)
@@ -45,6 +51,7 @@ class AddBatchDialog(QDialog):
         button_box.rejected.connect(self.close)
         button_box.accepted.connect(self.validate_input)
         self.no_exipration_option.toggled.connect(self.toggle_date_input)
+        self.code_input.textChanged.connect(self.search_product_by_code)
         
         self.message_label.hide()
         self.message_label.setStyleSheet("color: red;")
@@ -57,18 +64,31 @@ class AddBatchDialog(QDialog):
 
         self.setLayout(layout)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return:
+            event.accept() 
+        else:
+            super().keyPressEvent(event)
+
     def populate_product_input(self):
         con = sqlite3.connect(Paths.db())
         cur = con.cursor()
-        idandname = cur.execute("SELECT id, name from product_test")
+        products = cur.execute("SELECT id, name, code from product_test")
         names = []
         ids = []
-        for entry in idandname:
-            ids.append(entry[0])
-            names.append(entry[1])
+        for product in products:
+            ids.append(product[0])
+            names.append(product[1])
+            self.codes.append(product[2])
         self.product_input.addItems(names)
         self.names = names
         self.ids = ids
+
+    def search_product_by_code(self, code):
+        if code in self.codes:
+            print("CODE MATCH")
+            index = self.codes.index(code)
+            self.product_input.setCurrentIndex(index + 1)
     
     def toggle_date_input(self):
         if self.no_exipration_option.isChecked():
@@ -80,6 +100,7 @@ class AddBatchDialog(QDialog):
         self.message_label.hide()
         product = self.product_input.currentText()
         amount = self.amount_input.value()
+        code = self.code_input.text()
         msgs = []
         if product not in self.names:
             msgs.append("SELECCIONE UN PRODUCTO DENTRO DE LAS OPCIONES.")

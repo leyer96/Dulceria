@@ -53,7 +53,7 @@ def create_test_tables():
                 brand VARCHAR(50) NOT NULL UNIQUE,
                 price FLOAT NOT NULL,
                 category VARCHAR(20) NOT NULL,
-                code TEXT
+                code TEXT UNIQUE
                 )
                 """)
     
@@ -219,6 +219,17 @@ def load_settings():
     with open(Paths.setting("settings.json"), "r") as f:
         data = json.load(f)
         return data
+def save_settings(settings):
+    with open(Paths.setting("settings.json"), "w") as f:
+        dump = json.dumps(settings)
+        try:
+            f.write(dump)
+        except Exception as e:
+            print(e)
+            return False
+        else:
+            f.close()
+            return True
 
 # GLOBAL
 default_cb_str = "--SELECCIONAR--"

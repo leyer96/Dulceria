@@ -61,6 +61,7 @@ class PaymentModel(QSqlQueryModel):
     def get_all_payments(self):
         query = """
             SELECT * FROM payment_test
+            LIMIT 50
         """
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)

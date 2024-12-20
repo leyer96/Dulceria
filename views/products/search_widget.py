@@ -21,12 +21,10 @@ class SearchWidget(QWidget):
         self.search_btn = QPushButton()
         search_btn_icon = QIcon(Paths.icon("application-search-result.png"))
         self.search_btn.setIcon(search_btn_icon)
-        self.search_checkbox = QCheckBox("Consultar")
 
         search_input_layout = QHBoxLayout()
         search_input_layout.addWidget(self.search_input)
         search_input_layout.addWidget(self.search_btn)
-        search_input_layout.addWidget(self.search_checkbox)
         # FILTER BY SECTION
         filter_label = QLabel("Filtrar por:")
         self.filter_by_name = QRadioButton("Nombre")

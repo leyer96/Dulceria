@@ -7,24 +7,24 @@ class StockModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Marca", "Producto", "Categoría", "Cantidad en Stock"]
+        self.headers = ["ID", "Producto", "Marca", "Categoría", "Cantidad en Stock"]
         self.filter = None
     
     def data(self, index, role):
         value = super().data(index, Qt.DisplayRole)
         if role == Qt.DisplayRole:
-            if index.column() == 0 or index.column() == 1:
+            if index.column() == 1 or index.column() == 2:
                     return value.capitalize()
             return value
     def search(self, search_str, filter):
         self.search_str = search_str
         self.filter = filter
         query = """
-
-            SELECT product_test.brand, product_test.name, product_test.category, stock_test.amount FROM stock_test
+            SELECT product_test.id, product_test.name, product_test.brand, product_test.category, stock_test.amount FROM stock_test
             JOIN product_test ON stock_test.product_id = product_test.id
             WHERE product_test.{} LIKE :search_str
             ORDER BY stock_test.amount
+            LIMIT 50
         """.format(filter)
         Qquery = QSqlQuery(db=self.db)
         Qquery.prepare(query)
@@ -36,9 +36,10 @@ class StockModel(QSqlQueryModel):
 
     def get_all_stock(self):
         query = """
-            SELECT product_test.brand, product_test.name, product_test.category, stock_test.amount FROM stock_test
+            SELECT product_test.id, product_test.name, product_test.brand, product_test.category, stock_test.amount FROM stock_test
             JOIN product_test ON stock_test.product_id = product_test.id
             ORDER BY stock_test.amount
+            LIMIT 50
         """
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
@@ -46,11 +47,11 @@ class StockModel(QSqlQueryModel):
     def refresh_table(self):
         if self.filter:
             query = """
-            
-            SELECT product_test.brand, product_test.name, product_test.category, stock_test.amount FROM stock_test
+            SELECT product_test.id, product_test.name, product_test.brand, product_test.category, stock_test.amount FROM stock_test
             JOIN product_test ON stock_test.product_id = product_test.id
             WHERE product_test.{} LIKE :search_str
             ORDER BY stock_test.amount
+            LIMIT 50
         """.format(self.filter)
             Qquery = QSqlQuery(db=self.db)
             Qquery.prepare(query)

@@ -15,3 +15,14 @@
         }
     }
 }
+
+{"permissions": {
+    "home_window": {},
+    "payments_window": {"view": false},
+    "stock_window": {"add": false, "resolve": false},
+    "products_window": {"add": false, "edit": false, "delete": false}
+},
+"gui": {
+    "product_categories": ["--SELECCIONAR--", "Dulce", "Chocolate", "Papas", "Decoración", "Fiesta", "Desechable", "Vestir"]
+}
+}

@@ -8,17 +8,19 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QDialogButtonBox,
 )
-from PySide6.QtCore import Signal
-from utils import Paths, product_categories
+from PySide6.QtCore import Signal, Qt
+from utils import Paths
 import sqlite3
 
 
 class AddItemDialog(QDialog):
     saved = Signal()
-    def __init__(self, db):
+    def __init__(self, db, categories):
         super().__init__()
 
         self.db = db
+
+        self.categories = categories
 
         form = QFormLayout()
         self.name_input = QLineEdit()
@@ -26,7 +28,7 @@ class AddItemDialog(QDialog):
         self.price_input = QDoubleSpinBox()
         self.price_input.setRange(0,9999)
         self.category_input = QComboBox()
-        self.category_input.addItems(product_categories)
+        self.category_input.addItems(categories)
         self.code_input = QLineEdit()
         form.addRow("Producto*", self.name_input)
         form.addRow("Marca", self.brand_input)
@@ -50,6 +52,12 @@ class AddItemDialog(QDialog):
 
         self.setLayout(layout)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return:
+            event.accept() 
+        else:
+            super().keyPressEvent(event)
+    
     def validate_input(self):
         self.message_label.hide()
         name = self.name_input.text()
@@ -57,7 +65,7 @@ class AddItemDialog(QDialog):
         price = self.price_input.value()
         category = self.category_input.currentText()
         code = self.code_input.text()
-        if name and price > 0 and category != product_categories[0]:
+        if name and price > 0 and category != self.categories[0]:
             name = name.lower()
             brand= brand.lower()
             item_data = {
@@ -97,7 +105,7 @@ class AddItemDialog(QDialog):
             con.commit()
         except sqlite3.Error as e:
             print(e)
-            self.message_label.setText("Ya existe un producto con este nombre. Modifique el producto o elimínelo.")
+            self.message_label.setText("Ya existe un producto con este nombre o código. Modifique el producto o elimínelo.")
             self.message_label.show()
         else:
             product_id = cur.lastrowid

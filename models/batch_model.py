@@ -12,7 +12,7 @@ class BatchModel(QSqlQueryModel):
         self.db = db
         self.headers = ["Lote", "Marca", "Producto", "Categoría", "Cantidad en Lote", "Fecha de Caducidad", "Días para Caducar"]
         self.filter = None
-        self.search_str = None
+        self.search_str = ""
 
     def data(self, index, role):
         value = super().data(index, Qt.DisplayRole)
@@ -40,11 +40,12 @@ class BatchModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT batch_test.id, product_test.brand, product_test.name, product_test.category, batch_test.amount, batch_test.expiration_date 
+            SELECT batch_test.id, product_test.name, product_test.brand, product_test.category, batch_test.amount, batch_test.expiration_date 
             FROM batch_test
             JOIN product_test ON batch_test.product_id = product_test.id
             WHERE product_test.{} LIKE :search_term AND batch_test.show = 1
             ORDER BY batch_test.expiration_date
+            LIMIT 50
         """.format(filter)
         Qquery = QSqlQuery(db=self.db)
         Qquery.prepare(query)
@@ -56,11 +57,12 @@ class BatchModel(QSqlQueryModel):
 
     def get_all_batchs(self):
         query = """
-            SELECT batch_test.id, product_test.brand, product_test.name, product_test.category, batch_test.amount, batch_test.expiration_date 
+            SELECT batch_test.id, product_test.name, product_test.brand, product_test.category, batch_test.amount, batch_test.expiration_date 
             FROM batch_test
             JOIN product_test ON batch_test.product_id = product_test.id
+            WHERE batch_test.show = 1
             ORDER BY batch_test.expiration_date
-            LIMIT 20
+            LIMIT 50
         """
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
@@ -68,16 +70,16 @@ class BatchModel(QSqlQueryModel):
     def refresh_table(self):
         if self.filter:
             query = """
-            SELECT batch_test.id, product_test.brand, product_test.name, product_test.category, batch_test.amount, batch_test.expiration_date 
+            SELECT batch_test.id, product_test.name, product_test.brand, product_test.category, batch_test.amount, batch_test.expiration_date 
             FROM batch_test
-            JOIN product_test ON stock_test.product_id = product_test.id
-            WHERE product_test.{} like :search_term
+            JOIN product_test ON batch_test.product_id = product_test.id
+            WHERE product_test.{} LIKE :search_term AND batch_test.show = 1
             ORDER BY batch_test.expiration_date
-        """.format(self.filter)
+            LIMIT 50
+            """.format(filter)
             Qquery = QSqlQuery(db=self.db)
             Qquery.prepare(query)
-            Qquery.bindValue(":search_term", f"%{self.search_str}")
-            self.setQuery(Qquery)
+            Qquery.bindValue(":search_term", f'%{self.search_str}%')
         else:
             self.get_all_batchs()
 

@@ -86,6 +86,8 @@ class ProductsWindow(QWidget):
             pass
         self.filter = filter
         self.model.search(str, filter)
+        if self.search_widget.filter_by_code.isChecked():
+            self.search_widget.search_input.setText("")
 
     def on_clicked_row(self, index):
         self.selected_row = index.row()
@@ -94,7 +96,7 @@ class ProductsWindow(QWidget):
                 self.toggle_btns_state()
     
     def open_add_dialog(self):
-        dlg = AddItemDialog(self.db)
+        dlg = AddItemDialog(self.db, self.categories)
         dlg.saved.connect(self.model.refresh_table)
         if self.edit_product_btn.isEnabled():
             dlg.saved.connect(self.toggle_btns_state)
@@ -103,7 +105,7 @@ class ProductsWindow(QWidget):
     def open_edit_dialog(self, row):
         if row != None:
             product_id = self.model.data(self.model.index(row, 0), Qt.DisplayRole)
-            dlg = EditItemDialog(self.db, product_id)
+            dlg = EditItemDialog(self.db, product_id, self.categories)
             dlg.item_edited.connect(self.model.refresh_table)
             dlg.item_edited.connect(self.toggle_btns_state)
             dlg.exec()
@@ -112,7 +114,7 @@ class ProductsWindow(QWidget):
         if row != None:
             selection = QMessageBox.question(self, "Confirmar", "Estás seguro que quieres eliminar este producto?")
             if selection == QMessageBox.StandardButton.Yes:
-                product_id = int(self.model.data(self.model.index(row, 0)))
+                product_id = int(self.model.data(self.model.index(row, 0), Qt.DisplayRole))
                 self.model.delete_product(product_id)
 
     def toggle_btns_state(self):
@@ -137,3 +139,4 @@ class ProductsWindow(QWidget):
             self.delete_product_btn.hide()
         else:
             self.delete_product_btn.show()
+        self.categories = settings["gui"]["product_categories"]

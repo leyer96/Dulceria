@@ -11,17 +11,18 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal
 from PySide6.QtSql import QSqlQuery
-from utils import Paths, product_categories
+from utils import Paths
 import sqlite3
 
 class EditItemDialog(QDialog):
     item_edited = Signal()
-    def __init__(self, db, product_id):
+    def __init__(self, db, product_id, categories):
         super().__init__()
 
         self.db = db
 
         self.product_id = str(product_id)
+        self.categories = categories
 
         form = QFormLayout()
         self.name_input = QLineEdit()
@@ -29,7 +30,7 @@ class EditItemDialog(QDialog):
         self.price_input = QDoubleSpinBox()
         self.price_input.setRange(0,9999)
         self.category_input = QComboBox()
-        self.category_input.addItems(product_categories)
+        self.category_input.addItems(categories)
         self.code_input = QLineEdit()
         form.addRow("Nombre", self.name_input)
         form.addRow("Marca", self.brand_input)
@@ -84,7 +85,7 @@ class EditItemDialog(QDialog):
             msgs.append("Agregue el nombre del producto")
         if price == 0:
             msgs.append("Agregue un precio válido")
-        if category == product_categories[0]:
+        if category == self.categories[0]:
             msgs.append("Seleccione una categoría válida")
         if len(msgs)== 0:
             name = name.lower()
