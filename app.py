@@ -7,11 +7,10 @@ from utils import Paths
 
 app = QApplication([])
 
-# ----- USAR SQLITE ??? -----
 db = QSqlDatabase("QSQLITE") 
-db.setDatabaseName(Paths.db()) 
+db.setDatabaseName(Paths.test("db.db")) 
+# db.setDatabaseName(Paths.db()) 
 db.open()
-# ---------------------------
 
 w = MainWindow(db)
 

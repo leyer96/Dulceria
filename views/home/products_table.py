@@ -47,6 +47,8 @@ class SearchBox(QWidget):
         # SIGNALS
         self.table.clicked.connect(self.on_clicked_row)
         self.add_btn.clicked.connect(self.select_amount)
+        self.model.success.connect(self.add_btn.setEnabled(False))
+        self.model.error.connect(self.add_btn.setEnabled(False))
 
         # PROPS
         self.selected_row = None

@@ -16,10 +16,9 @@ from models.batch_model import BatchModel
 from views.dialogs.add_batch import AddBatchDialog
 from views.dialogs.edit_stock import EditStockDialog
 from views.dialogs.add_discount import AddDiscountDialog
-from views.dialogs.add_deal import AddDealDialog
 from utils import Paths, toggle_btns_state, load_settings
 
-class StockWindow(QWidget):
+class DealsWindow(QWidget):
     def __init__(self, db, menu):
         super().__init__()
 
@@ -30,13 +29,12 @@ class StockWindow(QWidget):
         self.batch_table = QTableView()
         self.stock_model = StockModel(db)
         self.batch_model = BatchModel(db)
-        stock_title = QLabel("Stock")
-        batch_title = QLabel("Lotes")
+        stock_title = QLabel("Promociones")
+        batch_title = QLabel("Descuentos")
         self.edit_stock_btn = QPushButton(QIcon(Paths.icon("pencil.png")), "Editar Stock")
         self.add_batch_btn = QPushButton(QIcon(Paths.icon("plus-button.png")),"Agregar Lote")
         self.resolve_batch_btn = QPushButton(QIcon(Paths.icon("blue-document-task.png")), "Resolver")
         self.add_discount_btn = QPushButton(QIcon(Paths.icon("chart-down.png")), "Agregar descuento")
-        self.add_deal_btn = QPushButton(QIcon(Paths.icon("star.png")), "Agregar Promoción")
         
         # CONFIG
         self.stock_table.setModel(self.stock_model)
@@ -55,31 +53,28 @@ class StockWindow(QWidget):
         self.selected_stock_row = -1
         self.resolve_batch_btn.setEnabled(False)
         self.edit_stock_btn.setEnabled(False)
-        self.add_deal_btn.setEnabled(False)
         self.menu.go_to_stock_btn.setEnabled(False)
+
         
         stock_title.setStyleSheet("font-size: 30px; font-weight: bold")
 
          # SIGNALS
         self.search_widget.search_btn.clicked.connect(self.handle_search)
         self.search_widget.search_input.returnPressed.connect(self.handle_search)
+        self.search_widget.search_input.returnPressed.connect(lambda: self.resolve_batch_btn.setEnabled(False))
         self.edit_stock_btn.clicked.connect(self.open_edit_stock_dialog)
         self.add_batch_btn.clicked.connect(self.open_add_batch_dialog)
         self.resolve_batch_btn.clicked.connect(self.resolve_batch)
-        self.add_discount_btn.clicked.connect(self.open_add_discount_dialog)
-        self.add_deal_btn.clicked.connect(self.open_add_deal_dialog)
+        self.add_discount_btn.clicked.connect(self.open_discount_dialog)
         self.stock_model.success.connect(lambda: self.edit_stock_btn.setEnabled(False))
         self.batch_model.success.connect(lambda: self.resolve_batch_btn.setEnabled(False))
-        self.batch_model.success.connect(lambda: self.add_deal_btn.setEnabled(False))
         self.batch_model.success.connect(lambda: self.add_discount_btn.setEnabled(False))
-        self.batch_model.success.connect(lambda: print("BATCH SEARCH"))
         
         # LAYOUT
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.add_batch_btn)
         buttons_layout.addWidget(self.resolve_batch_btn)
         buttons_layout.addWidget(self.add_discount_btn)
-        buttons_layout.addWidget(self.add_deal_btn)
 
         grid = QGridLayout()
         grid.addWidget(stock_title, 0, 0, 1, 12)
@@ -110,6 +105,8 @@ class StockWindow(QWidget):
         self.filter = filter
         self.stock_model.search(str, filter)
         self.batch_model.search(str, filter)
+        self.resolve_batch_btn.setEnabled(False)
+        self.edit_stock_btn.setEnabled(False)
         if self.search_widget.filter_by_code.isChecked():
             self.search_widget.search_input.setText("")
 
@@ -117,7 +114,7 @@ class StockWindow(QWidget):
         self.selected_batch_row = index.row()
         if self.selected_batch_row > -1:
             if not self.resolve_batch_btn.isEnabled():
-                toggle_btns_state([self.resolve_batch_btn, self.add_discount_btn, self.add_deal_btn])
+                toggle_btns_state([self.resolve_batch_btn, self.add_discount_btn])
 
     def on_clicked_stock_row(self, index):
         self.selected_stock_row = index.row()
@@ -139,30 +136,25 @@ class StockWindow(QWidget):
                 "amount": amount
             }
             dlg = EditStockDialog(product_data)
+            dlg.saved.connect(lambda: self.resolve_batch_btn.setEnabled(False))
+            dlg.saved.connect(lambda: self.edit_stock_btn.setEnabled(False))
             dlg.saved.connect(self.stock_model.refresh_table)
             dlg.saved.connect(self.batch_model.refresh_table)
             dlg.exec()  
     
     def open_add_batch_dialog(self):
         dlg = AddBatchDialog()
+        dlg.saved.connect(lambda: self.resolve_batch_btn.setEnabled(False))
+        dlg.saved.connect(lambda: self.edit_stock_btn.setEnabled(False))
         dlg.saved.connect(self.stock_model.refresh_table)
         dlg.saved.connect(self.batch_model.refresh_table)
         dlg.exec()
 
-    def open_add_discount_dialog(self):
+    def open_discount_dialog(self):
         row = self.selected_batch_row
         if row != -1:
             batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
             dlg = AddDiscountDialog(batch_id)
-            dlg.saved.connect(self.stock_model.refresh_table)
-            dlg.saved.connect(self.batch_model.refresh_table)
-            dlg.exec()
-
-    def open_add_deal_dialog(self):
-        row = self.selected_batch_row
-        if row != -1:
-            batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
-            dlg = AddDealDialog(batch_id)
             dlg.saved.connect(self.stock_model.refresh_table)
             dlg.saved.connect(self.batch_model.refresh_table)
             dlg.exec()

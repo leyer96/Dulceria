@@ -20,10 +20,10 @@ class StockModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT product_test.id, product_test.name, product_test.brand, product_test.category, stock_test.amount FROM stock_test
-            JOIN product_test ON stock_test.product_id = product_test.id
-            WHERE product_test.{} LIKE :search_str
-            ORDER BY stock_test.amount
+            SELECT product.id, product.name, product.brand, product.category, stock.amount FROM stock
+            JOIN product ON stock.product_id = product.id
+            WHERE product.{} LIKE :search_str
+            ORDER BY stock.amount
             LIMIT 50
         """.format(filter)
         Qquery = QSqlQuery(db=self.db)
@@ -33,33 +33,22 @@ class StockModel(QSqlQueryModel):
             self.error.emit()
         else:
             self.setQuery(Qquery)
+            self.success.emit()
 
     def get_all_stock(self):
         query = """
-            SELECT product_test.id, product_test.name, product_test.brand, product_test.category, stock_test.amount FROM stock_test
-            JOIN product_test ON stock_test.product_id = product_test.id
-            ORDER BY stock_test.amount
+            SELECT product.id, product.name, product.brand, product.category, stock.amount FROM stock
+            JOIN product ON stock.product_id = product.id
+            ORDER BY stock.amount
             LIMIT 50
         """
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
+        self.success.emit()
 
     def refresh_table(self):
         if self.filter:
-            query = """
-            SELECT product_test.id, product_test.name, product_test.brand, product_test.category, stock_test.amount FROM stock_test
-            JOIN product_test ON stock_test.product_id = product_test.id
-            WHERE product_test.{} LIKE :search_str
-            ORDER BY stock_test.amount
-            LIMIT 50
-        """.format(self.filter)
-            Qquery = QSqlQuery(db=self.db)
-            Qquery.prepare(query)
-            Qquery.bindValue(":search_str", f"%{self.search_str}%")
-            if not Qquery.exec():
-                self.error.emit()
-            else:
-                self.setQuery(Qquery)
+            self.search(self.search_str, self.filter)
         else:
             self.get_all_stock()
 

@@ -5,6 +5,7 @@ from views.products.products_window import ProductsWindow
 from views.payments.payments_window import PaymentsWindow
 from views.stock.stock_window import StockWindow
 from views.admin.admin_window import AdminWindow
+from views.deals.deals_window import DealsWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, db):
@@ -12,7 +13,7 @@ class MainWindow(QMainWindow):
 
         self.resize(700, 500)
  
-        windows = [HomeWindow, ProductsWindow, PaymentsWindow, StockWindow, AdminWindow]
+        windows = [HomeWindow, ProductsWindow, PaymentsWindow, StockWindow, DealsWindow, AdminWindow]
         initialized_window = []
 
         container = QWidget()
@@ -24,7 +25,8 @@ class MainWindow(QMainWindow):
             menu.go_to_products.connect(lambda: container_layout.setCurrentIndex(1))
             menu.go_to_payments.connect(lambda: container_layout.setCurrentIndex(2))
             menu.go_to_stock.connect(lambda: container_layout.setCurrentIndex(3))
-            menu.go_to_admin.connect(lambda: container_layout.setCurrentIndex(4))
+            menu.go_to_deals.connect(lambda: container_layout.setCurrentIndex(4))
+            menu.go_to_admin.connect(lambda: container_layout.setCurrentIndex(5))
             w = window(db, menu)
 
             initialized_window.append(w)

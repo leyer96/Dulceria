@@ -8,6 +8,7 @@ class Paths:
     style = os.path.join(base, "resources/styles.qss")
     threads = os.path.join(base, "models/threads")
     views = os.path.join(base, "views")
+    tests = os.path.join(base, "TEST")
     
     # File loaders
     @classmethod
@@ -31,6 +32,9 @@ class Paths:
     @classmethod
     def view(cls, filename):
         return os.path.join(cls.views, filename)
+    @classmethod
+    def test(cls, filename):
+        return os.path.join(cls.tests, filename)
     
 # GUI
 def toggle_btns_state(btns):
@@ -43,11 +47,10 @@ def toggle_btns_state(btns):
 # DB
 import sqlite3
 def create_test_tables():
-    con = sqlite3.connect(Paths.db())
+    con = sqlite3.connect(Paths.test("db.db"))
     cur = con.cursor()
-    
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS product_test (
+        CREATE TABLE IF NOT EXISTS product (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(100) NOT NULL UNIQUE,
                 brand VARCHAR(50) NOT NULL UNIQUE,
@@ -58,7 +61,7 @@ def create_test_tables():
                 """)
     
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS payment_test (
+        CREATE TABLE IF NOT EXISTS payment (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 payment_form TEXT NOT NULL,
@@ -68,29 +71,29 @@ def create_test_tables():
                 """)
     
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS productpayment_test (
+        CREATE TABLE IF NOT EXISTS productpayment (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 product_id INTEGER NOT NULL,
                 payment_id INTEGER NOT NULL,
                 product_name TEXT NOT NULL,
                 amount INTEGER NOT NULL,
                 unit_price FLOAT NOT NULL,
-                FOREIGN KEY (product_id) REFERENCES product_test(id)
-                FOREIGN KEY (payment_id) REFERENCES payment_test(id)
+                FOREIGN KEY (product_id) REFERENCES product(id)
+                FOREIGN KEY (payment_id) REFERENCES payment(id)
             );
                 """)
     cur.execute(""" 
-        CREATE TABLE IF NOT EXISTS stock_test (
+        CREATE TABLE IF NOT EXISTS stock (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 product_id INTEGER NOT NULL,
                 product TEXT NOT NULL,
                 amount INT DEFAULT 0,
                 status INT DEFAULT 1,
-                FOREIGN KEY (product_id) REFERENCES product_test(id)
+                FOREIGN KEY (product_id) REFERENCES product(id)
                 )
                 """)
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS batch_test (
+        CREATE TABLE IF NOT EXISTS batch (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 product_id INTEGER NOT NULL,
                 stock_id INTEGER NOT NULL,
@@ -99,24 +102,141 @@ def create_test_tables():
                 expiration_date DATE,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 show INTEGER DEFAULT 1,
-                FOREIGN KEY (product_id) REFERENCES produt_test(id)
+                FOREIGN KEY (product_id) REFERENCES product(id)
                 FOREIGN KEY (stock_id) REFERENCES stock(id)
                 )
                 """)
-    
-def drop_test_tables():
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS discount (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER UNIQUE,
+                price FLOAT NOT NULL,
+                expiration_date DATETIME,
+                redeems INTEGER,
+                FOREIGN KEY (product_id) REFERENCES product(id)
+                )
+        """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS deal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER UNIQUE,
+                type INTEGER DEFAULT 0,
+                first_amount INTEGER,
+                second_amount INTEGER,
+                amount INTEGER,
+                price FLOAT,
+                expiration_date DATETIME,
+                redeems INTEGER,
+                FOREIGN KEY (product_id) REFERENCES product(id)
+                )
+        """)
+def create_db_tables():
     con = sqlite3.connect(Paths.db())
     cur = con.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS product (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(100) NOT NULL UNIQUE,
+                brand VARCHAR(50) NOT NULL UNIQUE,
+                price FLOAT NOT NULL,
+                category VARCHAR(20) NOT NULL,
+                code TEXT UNIQUE
+                )
+                """)
+    
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS payment (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                payment_form TEXT NOT NULL,
+                amount FLOAT NOT NULL,
+                note TEXT
+            );
+                """)
+    
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS productpayment (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER NOT NULL,
+                payment_id INTEGER NOT NULL,
+                product_name TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                unit_price FLOAT NOT NULL,
+                FOREIGN KEY (product_id) REFERENCES product(id)
+                FOREIGN KEY (payment_id) REFERENCES payment(id)
+            );
+                """)
+    cur.execute(""" 
+        CREATE TABLE IF NOT EXISTS stock (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER NOT NULL,
+                product TEXT NOT NULL,
+                amount INT DEFAULT 0,
+                status INT DEFAULT 1,
+                FOREIGN KEY (product_id) REFERENCES product(id)
+                )
+                """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS batch (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER NOT NULL,
+                stock_id INTEGER NOT NULL,
+                product TEXT NOT NULL,
+                amount INT NOT NULL,
+                expiration_date DATE,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                show INTEGER DEFAULT 1,
+                FOREIGN KEY (product_id) REFERENCES produt(id)
+                FOREIGN KEY (stock_id) REFERENCES stock(id)
+                )
+                """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS discount (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER UNIQUE
+                price FLOAT NOT NULL
+                expiration_date DATETIME
+                redeems INTEGER
+                FOREIGN KEY (product_id) REFERENCES product(id)
+                )
+        """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS deal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_id INTEGER UNIQUE,
+                type INTEGER DEFAULT 0,
+                first_amount INTEGER,
+                second_amount INTEGER,
+                amount INTEGER,
+                price FLOAT,
+                expiration_date DATETIME,
+                redeems INTEGER,
+                FOREIGN KEY (product_id) REFERENCES product(id)
+                )
+        """)
+    
+def drop_test_tables():
+    con = sqlite3.connect(Paths.test("db.db"))
+    cur = con.cursor()
+    cur.execute("DROP TABLE IF EXISTS payment")
+    cur.execute("DROP TABLE IF EXISTS productpayment")
+    cur.execute("DROP TABLE IF EXISTS product")
+    cur.execute("DROP TABLE IF EXISTS stock")
+    cur.execute("DROP TABLE IF EXISTS batch")
 
-    cur.execute("DROP TABLE IF EXISTS payment_test")
-    cur.execute("DROP TABLE IF EXISTS productpayment_test")
-    cur.execute("DROP TABLE IF EXISTS product_test")
-    cur.execute("DROP TABLE IF EXISTS stock_test")
-    cur.execute("DROP TABLE IF EXISTS batch_test")
+def drop_db_tables():
+    con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    cur.execute("DROP TABLE IF EXISTS payment")
+    cur.execute("DROP TABLE IF EXISTS productpayment")
+    cur.execute("DROP TABLE IF EXISTS product")
+    cur.execute("DROP TABLE IF EXISTS stock")
+    cur.execute("DROP TABLE IF EXISTS batch")
 
 
 def save_payment(payment_data, products):
-    con = sqlite3.connect(Paths.db())
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
     cur = con.cursor()
     payment_form = payment_data["payment_form"]
     amount = payment_data["amount"]
@@ -124,7 +244,7 @@ def save_payment(payment_data, products):
     timestamp = datetime.now()
     try:
         cur.execute("""
-            INSERT INTO payment_test (payment_form, amount, note, timestamp) VALUES(?,?,?,?)
+            INSERT INTO payment (payment_form, amount, note, timestamp) VALUES(?,?,?,?)
                     """,(payment_form, amount, note, timestamp))
     except sqlite3.Error as e:
         print(e)
@@ -132,7 +252,7 @@ def save_payment(payment_data, products):
     else:
         payment_id = cur.lastrowid
         for product in products:
-            print("SAVING PRODUT")
+            print("SAVING PRODCUT")
             print(product)
             product_id = int(product[0])
             product_name = product[1]
@@ -140,7 +260,7 @@ def save_payment(payment_data, products):
             amount = int(product[4])
             try:
                 cur.execute("""
-                    INSERT INTO productpayment_test (product_id, payment_id, product_name, amount, unit_price) VALUES(?,?,?,?,?)
+                    INSERT INTO productpayment (product_id, payment_id, product_name, amount, unit_price) VALUES(?,?,?,?,?)
                         """,(product_id, payment_id, product_name, amount, unit_price))
             except:
                 return False
@@ -149,21 +269,23 @@ def save_payment(payment_data, products):
         return True
     
 def get_all_from_productpayment():
-    con = sqlite3.connect(Paths.db())
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
     cur = con.cursor()
     data = cur.execute(""" 
-        SELECT * FROM productpayment_test
-        JOIN payment_test ON productpayment_test.payment_id = payment_test.id
+        SELECT * FROM productpayment
+        JOIN payment ON productpayment.payment_id = payment.id
     """).fetchall()
     return data
 
 def get_prodcutpayment_from_payment_id(payment_id):
-    con = sqlite3.connect(Paths.db())
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
     cur = con.cursor()
     data = cur.execute(""" 
-        SELECT * FROM productpayment_test
-        JOIN payment_test ON productpayment_test.payment_id = payment_test.id
-        WHERE payment_test.id = ?
+        SELECT * FROM productpayment
+        JOIN payment ON productpayment.payment_id = payment.id
+        WHERE payment.id = ?
     """, (payment_id,)).fetchall()
     return data
 
@@ -179,29 +301,177 @@ def get_prodcutpayment_from_month(month):
     date_end = datetime(year=year, month=month+1, day=1) - timedelta(days=1)
     date_start_str = date_start.strftime("%Y-%m-%d")
     date_end_str = date_end.strftime("%Y-%m-%d")
-    con = sqlite3.connect(Paths.db())
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
     cur = con.cursor()
     data = cur.execute(""" 
-        SELECT * FROM productpayment_test
-        JOIN payment_test ON productpayment_test.payment_id = payment_test.id
-        WHERE payment_test.timestamp BETWEEN ? AND ?;
+        SELECT * FROM productpayment
+        JOIN payment ON productpayment.payment_id = payment.id
+        WHERE payment.timestamp BETWEEN ? AND ?;
     """, (date_start_str, date_end_str)).fetchall()
     return data
 
+def get_discount(product_id):
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    discount = cur.execute("SELECT * FROM discount WHERE product_id = ?", (product_id,)).fetchone()
+    if discount:
+        discount_price = discount[2]
+        expiration_date_str = discount[3]
+        expiration_date = datetime.strptime(expiration_date_str, "%Y-%m-%d %H:%M:%S.%f")
+        redeems = discount[4]
+        if expiration_date < datetime.now():
+            try:
+                cur.execute("DELETE FROM discuont WHERE product_id = ?", (product_id,))
+            except sqlite3.Error as e:
+                print(e)
+            else:
+                con.commit()
+            finally:
+                return False
+        else:
+            discount_data = {
+                "discount_price": discount_price,
+                "redeems": redeems
+            }
+            return discount_data
+    else:
+        return False
+    
+def get_deal(product_id):
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    discount = cur.execute("SELECT * FROM deal WHERE product_id = ?", (product_id,)).fetchone()
+    if discount:
+        type = discount[2]
+        expiration_date_str = discount[7]
+        expiration_date = datetime.strptime(expiration_date_str, "%Y-%m-%d %H:%M:%S.%f")
+        redeems = discount[8]
+        if expiration_date < datetime.now():
+            try:
+                cur.execute("DELETE FROM discuont WHERE product_id = ?", (product_id,))
+            except sqlite3.Error as e:
+                print(e)
+            else:
+                con.commit()
+            finally:
+                return False
+        else:
+            if type == 0:
+                first_amount = discount[3]
+                second_amount = discount[4]
+                deal_data = {
+                    "type": type,
+                    "first_amount": first_amount,
+                    "second_amount": second_amount,
+                    "redeems": redeems
+                }
+            else:
+                amount = discount[5]
+                deal_price = discount[6]
+                deal_data = {
+                    "type": type,
+                    "amount": amount,
+                    "deal_price": deal_price,
+                    "redeems": redeems
+                }
+            return deal_data
+    else:
+        return False
+
 def substract_from_stock(products):
-    con = sqlite3.connect(Paths.db())
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
     cur = con.cursor()
     for product in products:
         product_id = product[0]
         amount = product[4]
-        prev_amount = cur.execute("SELECT amount from stock_test where stock_test.product_id = ?", (product_id,)).fetchone()[0]
+        prev_amount = cur.execute("SELECT amount from stock where stock.product_id = ?", (product_id,)).fetchone()[0]
         if prev_amount > 0:
             new_amount = int(prev_amount - amount)
-            cur.execute("UPDATE stock_test SET amount = ? WHERE stock_test.product_id = ?", (new_amount, product_id))
+            cur.execute("UPDATE stock SET amount = ? WHERE stock.product_id = ?", (new_amount, product_id))
         else:
             print("ERROR DE EMPAREJAMIENTO CON STOCK REAL")
     con.commit()
     return True
+
+def update_discount(products, discounts):
+    if not discounts:
+        return True
+    for discount in discounts:
+        product_index = list(discount.keys())[0]
+        redeems = discount[product_index]
+        product_id = products[product_index][0]
+        amount = products[product_index][4]
+        available_redeems = redeems - amount
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
+        cur = con.cursor()
+        if redeems == 0:
+            return True
+        if available_redeems <= 0:
+            print("REDEEMS EXPIRED")
+            try:
+                cur.execute("DELETE FROM discount WHERE product_id = ?", (product_id,))
+            except sqlite3.Error as e:
+                print(e)
+                return False
+            else:
+                con.commit()
+                return True
+        else:
+            print("REEDEMS UPDATING")
+            try:
+                cur.execute("UPDATE discount SET redeems = ? WHERE product_id = ?", (available_redeems, product_id))
+            except sqlite3.Error as e:
+                print(e)
+                return False
+            else:
+                con.commit()
+                return True
+
+def update_deal(products, deals):
+    if not deals:
+        return True
+    for deal in deals:
+        product_index = list(deal.keys())[0]
+        redeems = deal[product_index]
+        product_id = products[product_index][0]
+        amount = products[product_index][4]
+        available_redeems = redeems - amount
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
+        cur = con.cursor()
+        if redeems == 0:
+            return True
+        if available_redeems <= 0:
+            print("REDEEMS EXPIRED")
+            try:
+                cur.execute("DELETE FROM deal WHERE product_id = ?", (product_id,))
+            except sqlite3.Error as e:
+                print(e)
+                return False
+            else:
+                con.commit()
+                return True
+        else:
+            print("REEDEMS UPDATING")
+            try:
+                cur.execute("UPDATE deal SET redeems = ? WHERE product_id = ?", (available_redeems, product_id))
+            except sqlite3.Error as e:
+                print(e)
+                return False
+            else:
+                con.commit()
+                return True
+
+def get_expiration_date(days):
+    today = datetime.today()
+    expiration_date = today + timedelta(days=days)
+    return expiration_date
+
 
 import csv
 def create_csv_file(data, headers, folder_path, filename):

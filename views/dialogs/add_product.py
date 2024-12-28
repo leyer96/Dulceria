@@ -82,7 +82,7 @@ class AddItemDialog(QDialog):
                 error_message += "\n Agregue un nombre."
             if price == 0:
                 error_message += "\n Agregue un precio."
-            if category == product_categories[0]:
+            if category == self.categories[0]:
                 error_message += "\n Seleccione una categoría"
             self.message_label.setText(error_message)
             self.message_label.show()
@@ -95,12 +95,13 @@ class AddItemDialog(QDialog):
         code = item_data["code"]
         if not code:
             code = None
-        con = sqlite3.connect(Paths.db())
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         # CHECK TRY-EXCEPT BLOCK --> MAYBE MOVE SQL COMMITS TO ELSE BLOCK
         try:
             cur.execute("""
-                INSERT INTO product_test (name, brand, price, category, code) VALUES(?,?,?,?,?)
+                INSERT INTO product (name, brand, price, category, code) VALUES(?,?,?,?,?)
             """, (name, brand, price, category, code))
             con.commit()
         except sqlite3.Error as e:
@@ -111,7 +112,7 @@ class AddItemDialog(QDialog):
             product_id = cur.lastrowid
             try:
                 cur.execute("""
-                    INSERT INTO stock_test (product_id, product)
+                    INSERT INTO stock (product_id, product)
                     VALUES(?, ?)
                 """, (product_id, name))
             except sqlite3.Error as e:

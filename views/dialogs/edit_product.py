@@ -57,10 +57,11 @@ class EditItemDialog(QDialog):
         self.setLayout(layout)
 
     def load_item_data(self):
-        con = sqlite3.connect(Paths.db())
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         query = """
-            SELECT * FROM product_test WHERE id = ?
+            SELECT * FROM product WHERE id = ?
         """
         product_data = cur.execute(query, self.product_id).fetchone()
         if product_data:        
@@ -101,7 +102,8 @@ class EditItemDialog(QDialog):
 
     def save(self, item_data):
         print(item_data)
-        con = sqlite3.connect(Paths.db())
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
 
         name = item_data["name"]
@@ -112,7 +114,7 @@ class EditItemDialog(QDialog):
         if not code:
             code = None
         query = """
-            UPDATE product_test
+            UPDATE product
             SET name = ?, brand = ?, price = ?, category = ?,code = ?
             WHERE id = ?
         """

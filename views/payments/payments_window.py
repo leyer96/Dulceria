@@ -9,7 +9,6 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QFileDialog,
     QMessageBox,
-    QVBoxLayout,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -54,6 +53,8 @@ class PaymentsWindow(QWidget):
             self.search_widget.data.connect(lambda date_data: self.model.search(date_data))
             self.view_details_btn.clicked.connect(self.open_payment_details_dialog)
             self.export_data_btn.clicked.connect(self.open_select_export_data_dialog)
+            self.model.success.connect(lambda: self.view_details_btn.setEnabled(False))
+            self.model.error.connect(lambda: self.view_details_btn.setEnabled(False))
 
             self.filler = QWidget()
 
@@ -75,7 +76,7 @@ class PaymentsWindow(QWidget):
       def on_clicked_row(self, index):
             self.selected_row = index.row()
             if not self.view_details_btn.isEnabled():
-                  toggle_btns_state([self.view_details_btn])
+                  self.view_details_btn.setEnabled(True)
 
       def open_payment_details_dialog(self):
             row = self.selected_row
@@ -113,10 +114,10 @@ class PaymentsWindow(QWidget):
             if option == "curr":
                   data = []
                   for r in range(0, self.model.rowCount()):
-                        row = []
-                        payment_id = self.model.data(self.model.index(r,0))
+                        payment_id = self.model.data(self.model.index(r,0), Qt.DisplayRole)
                         productpayments = get_prodcutpayment_from_payment_id(payment_id)
-                        data.append(productpayments)
+                        for productpayment in productpayments:
+                              data.append(productpayment)
                         fn = "extracto-del-" + today_str
             elif option == "all":
                   data = get_all_from_productpayment()
@@ -130,10 +131,11 @@ class PaymentsWindow(QWidget):
                   if dirname:
                         formated_data = []
                         for entry in data:
+                              print(len(entry))
                               timestamp = entry[7]
                               dateandtime = timestamp.split(" ")
                               payment_id = entry[2]
-                              payment_form = entry[9]
+                              payment_form = entry[8]
                               product = entry[3]
                               amount = entry[4]
                               price = entry[5]

@@ -36,10 +36,11 @@ class ViewPaymentDetailsDialog(QDialog):
         self.setLayout(layout)
 
     def populate_labels(self, payment_id):
-        con = sqlite3.connect(Paths.db())
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         productpayments = cur.execute("""
-            SELECT * FROM productpayment_test WHERE payment_id = ?
+            SELECT * FROM productpayment WHERE payment_id = ?
         """, (payment_id,)).fetchall()
         text_lines = []
         for productpayment in productpayments:

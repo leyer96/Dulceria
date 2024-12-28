@@ -2,11 +2,12 @@ from PySide6.QtSql import QSqlQueryModel, QSqlQuery
 from PySide6.QtCore import Qt, Signal
 import sqlite3
 from utils import Paths, date_raw_format
-from datetime import datetime, timedelta
+from datetime import datetime
 
 class BatchModel(QSqlQueryModel):
     error = Signal()
     updated = Signal()
+    success = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -40,11 +41,11 @@ class BatchModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT batch_test.id, product_test.name, product_test.brand, product_test.category, batch_test.amount, batch_test.expiration_date 
-            FROM batch_test
-            JOIN product_test ON batch_test.product_id = product_test.id
-            WHERE product_test.{} LIKE :search_term AND batch_test.show = 1
-            ORDER BY batch_test.expiration_date
+            SELECT batch.id, product.name, product.brand, product.category, batch.amount, batch.expiration_date 
+            FROM batch
+            JOIN product ON batch.product_id = product.id
+            WHERE product.{} LIKE :search_term AND batch.show = 1
+            ORDER BY batch.expiration_date
             LIMIT 50
         """.format(filter)
         Qquery = QSqlQuery(db=self.db)
@@ -54,32 +55,24 @@ class BatchModel(QSqlQueryModel):
             self.error.emit()
         else:
             self.setQuery(Qquery)
+            self.success.emit()
 
     def get_all_batchs(self):
         query = """
-            SELECT batch_test.id, product_test.name, product_test.brand, product_test.category, batch_test.amount, batch_test.expiration_date 
-            FROM batch_test
-            JOIN product_test ON batch_test.product_id = product_test.id
-            WHERE batch_test.show = 1
-            ORDER BY batch_test.expiration_date
+            SELECT batch.id, product.name, product.brand, product.category, batch.amount, batch.expiration_date 
+            FROM batch
+            JOIN product ON batch.product_id = product.id
+            WHERE batch.show = 1
+            ORDER BY batch.expiration_date
             LIMIT 50
         """
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
+        self.success.emit()
 
     def refresh_table(self):
         if self.filter:
-            query = """
-            SELECT batch_test.id, product_test.name, product_test.brand, product_test.category, batch_test.amount, batch_test.expiration_date 
-            FROM batch_test
-            JOIN product_test ON batch_test.product_id = product_test.id
-            WHERE product_test.{} LIKE :search_term AND batch_test.show = 1
-            ORDER BY batch_test.expiration_date
-            LIMIT 50
-            """.format(filter)
-            Qquery = QSqlQuery(db=self.db)
-            Qquery.prepare(query)
-            Qquery.bindValue(":search_term", f'%{self.search_str}%')
+            self.search(self.search_str, self.filter)
         else:
             self.get_all_batchs()
 
@@ -87,7 +80,7 @@ class BatchModel(QSqlQueryModel):
         con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         try:
-            cur.execute("UPDATE batch_test SET show = ? WHERE id = ?", (0, batch_id))
+            cur.execute("UPDATE batch SET show = ? WHERE id = ?", (0, batch_id))
         except sqlite3.Error as e:
             print(e)
             self.error.emit()

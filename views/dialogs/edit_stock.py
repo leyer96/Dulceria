@@ -36,10 +36,11 @@ class EditStockDialog(QDialog):
         self.setLayout(layout)
 
     def update_stock(self):
-        con = sqlite3.connect(Paths.db())
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         amount = self.amount_input.value()
-        query = "UPDATE stock_test SET amount = ? WHERE id = ?"
+        query = "UPDATE stock SET amount = ? WHERE id = ?"
         try:
             cur.execute(query, (amount, self.product_id))
         except sqlite3.Error as e:

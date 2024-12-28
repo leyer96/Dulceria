@@ -50,7 +50,8 @@ class ProductsWindow(QWidget):
         self.add_product_btn.clicked.connect(self.open_add_dialog)
         self.edit_product_btn.clicked.connect(lambda: self.open_edit_dialog(self.selected_row))
         self.delete_product_btn.clicked.connect(lambda: self.delete_product(self.selected_row))
-        self.model.success.connect(self.toggle_btns_state)
+        self.model.success.connect(lambda: self.edit_product_btn.setEnabled(False))
+        self.model.success.connect(lambda: self.delete_product_btn.setEnabled(False))
         
         # LAYOUT
         buttons_layout = QHBoxLayout()
@@ -70,9 +71,6 @@ class ProductsWindow(QWidget):
         self.load_settings()
         
     def handle_search(self):
-        if self.edit_product_btn.isEnabled():
-            self.edit_product_btn.setEnabled(False)
-            self.delete_product_btn.setEnabled(False)
         str = self.search_widget.search_input.text()
         self.search_str = str
         filter = ""
@@ -93,13 +91,12 @@ class ProductsWindow(QWidget):
         self.selected_row = index.row()
         if self.selected_row > -1:
             if not self.edit_product_btn.isEnabled():
-                self.toggle_btns_state()
+                self.edit_product_btn.setEnabled(True)
+                self.delete_product_btn.setEnabled(True)
     
     def open_add_dialog(self):
         dlg = AddItemDialog(self.db, self.categories)
         dlg.saved.connect(self.model.refresh_table)
-        if self.edit_product_btn.isEnabled():
-            dlg.saved.connect(self.toggle_btns_state)
         dlg.exec()
     
     def open_edit_dialog(self, row):
@@ -107,7 +104,6 @@ class ProductsWindow(QWidget):
             product_id = self.model.data(self.model.index(row, 0), Qt.DisplayRole)
             dlg = EditItemDialog(self.db, product_id, self.categories)
             dlg.item_edited.connect(self.model.refresh_table)
-            dlg.item_edited.connect(self.toggle_btns_state)
             dlg.exec()
         
     def delete_product(self, row):
@@ -116,14 +112,6 @@ class ProductsWindow(QWidget):
             if selection == QMessageBox.StandardButton.Yes:
                 product_id = int(self.model.data(self.model.index(row, 0), Qt.DisplayRole))
                 self.model.delete_product(product_id)
-
-    def toggle_btns_state(self):
-        if self.edit_product_btn.isEnabled():
-            self.edit_product_btn.setEnabled(False)
-            self.delete_product_btn.setEnabled(False)
-        else:
-            self.edit_product_btn.setEnabled(True)
-            self.delete_product_btn.setEnabled(True)
 
     def load_settings(self):
         settings = load_settings()

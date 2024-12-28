@@ -1,8 +1,6 @@
 from PySide6.QtSql import QSqlQueryModel, QSqlQuery
 from PySide6.QtCore import Qt, Signal
-import sqlite3
 from datetime import datetime, timedelta
-from utils import Paths
 
 class PaymentModel(QSqlQueryModel):
     error = Signal()
@@ -34,38 +32,6 @@ class PaymentModel(QSqlQueryModel):
                if orientation == Qt.Horizontal:
                    return self.headers[section]
     
-    def search(self, search_str, filter):
-        query = """
-            SELECT (id, timestamp, payment_form, amount, note) FROM payment_test
-            WHERE {} LIKE :search_str
-        """.format(filter)
-        Qquery = QSqlQuery(db=self.db)
-        Qquery.prepare(query)
-        Qquery.bindValue(":search_str", f"%{search_str}%")
-        if not Qquery.execute():
-            self.error.emit()
-        else:
-            self.setQuery(Qquery)
-               
-    def get_todays_payment(self):
-        today_date_str = datetime.today().strftime("%Y-%m-%d")
-        tomorrow_date = datetime.today() + timedelta(days=1)
-        tomorrow_date_str = tomorrow_date.strftime("%Y-%m-%d")
-        query = """
-            SELECT * FROM payment_test
-            WHERE timestamp BETWEEN '{}' AND '{}'
-        """.format(today_date_str, tomorrow_date_str)
-        Qquery = QSqlQuery(query, db=self.db)
-        self.setQuery(Qquery)
-    
-    def get_all_payments(self):
-        query = """
-            SELECT * FROM payment_test
-            LIMIT 50
-        """
-        Qquery = QSqlQuery(query, db=self.db)
-        self.setQuery(Qquery)
-
     def search(self, date_data):
         start_date = date_data["start_date"]
         start_date_str = start_date.toString("yyyy-MM-dd")
@@ -73,9 +39,48 @@ class PaymentModel(QSqlQueryModel):
         end_date = end_date.addDays(1)
         end_date_str = end_date.toString("yyyy-MM-dd")
         query = """
-            SELECT * FROM payment_test WHERE timestamp
+            SELECT * FROM payment WHERE timestamp
             BETWEEN '{}' AND '{}'
         """.format(start_date_str, end_date_str)
-        Qquery = QSqlQuery(query, db=self.db)
-        self.setQuery(Qquery)
+        try:
+            Qquery = QSqlQuery(query, db=self.db)
+            self.setQuery(Qquery)
+        except Exception as e:
+            print(e)
+            self.error.emit()
+        else:
+            self.success.emit()
+               
+    def get_todays_payment(self):
+        today_date_str = datetime.today().strftime("%Y-%m-%d")
+        tomorrow_date = datetime.today() + timedelta(days=1)
+        tomorrow_date_str = tomorrow_date.strftime("%Y-%m-%d")
+        query = """
+            SELECT * FROM payment
+            WHERE timestamp BETWEEN '{}' AND '{}'
+        """.format(today_date_str, tomorrow_date_str)
+        try:
+            Qquery = QSqlQuery(query, db=self.db)
+            self.setQuery(Qquery)
+        except Exception as e:
+            print(e)
+            self.error.emit()
+        else:
+            self.success.emit()
+    
+    def get_all_payments(self):
+        query = """
+            SELECT * FROM payment
+            LIMIT 50
+        """
+        try:
+            Qquery = QSqlQuery(query, db=self.db)
+            self.setQuery(Qquery)
+        except Exception as e:
+            print(e)
+            self.error.emit()
+        else:
+            self.success.emit()
+
+    
         

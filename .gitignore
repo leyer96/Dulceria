@@ -1,0 +1,4 @@
+*.pyc
+test.py
+.DS_STORE
+*.db

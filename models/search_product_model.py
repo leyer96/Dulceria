@@ -24,7 +24,7 @@ class SearchModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT id, name, brand, price, category, code FROM product_test
+            SELECT id, name, brand, price, category, code FROM product
             WHERE {} LIKE :search_str
             LIMIT 50
         """.format(filter)
@@ -35,31 +35,21 @@ class SearchModel(QSqlQueryModel):
             self.error.emit()
         else:
             self.setQuery(Qquery)
+            self.success.emit()
 
     def get_all_prodcuts(self):
         query = """
-            SELECT * FROM product_test
+            SELECT * FROM product
             ORDER BY NAME
             LIMIT 50
         """
         Qquery = QSqlQuery(query, db=self.db)
         self.setQuery(Qquery)
+        self.success.emit()
 
     def refresh_table(self):
         if self.filter:
-            query = """
-                SELECT id, name, brand, price, category, code FROM product_test
-                WHERE {} LIKE :search_str
-                ORDER BY NAME
-                LIMIT 50
-            """.format(self.filter)
-            Qquery = QSqlQuery(db=self.db)
-            Qquery.prepare(query)
-            Qquery.bindValue(":search_str", f"%{self.search_str}%")
-            if not Qquery.exec():
-                self.error.emit()
-            else:
-                self.setQuery(Qquery)
+            self.search(self.search_str, self.filter)
         else:
             query = """
             SELECT * FROM product_test
@@ -68,6 +58,7 @@ class SearchModel(QSqlQueryModel):
             """
             Qquery = QSqlQuery(query, db=self.db)
             self.setQuery(Qquery)
+            self.success.emit()
 
     def delete_product(self, product_id):
         con = sqlite3.connect(Paths.db())
