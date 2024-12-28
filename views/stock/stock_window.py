@@ -6,7 +6,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QWidget,
     QHBoxLayout,
-    QLabel
+    QLabel,
+    QMessageBox
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -72,7 +73,6 @@ class StockWindow(QWidget):
         self.batch_model.success.connect(lambda: self.resolve_batch_btn.setEnabled(False))
         self.batch_model.success.connect(lambda: self.add_deal_btn.setEnabled(False))
         self.batch_model.success.connect(lambda: self.add_discount_btn.setEnabled(False))
-        self.batch_model.success.connect(lambda: print("BATCH SEARCH"))
         
         # LAYOUT
         buttons_layout = QHBoxLayout()
@@ -156,6 +156,7 @@ class StockWindow(QWidget):
             dlg = AddDiscountDialog(batch_id)
             dlg.saved.connect(self.stock_model.refresh_table)
             dlg.saved.connect(self.batch_model.refresh_table)
+            dlg.saved.connect(lambda: QMessageBox.information(self, "Descuento Guardado", "Descuento guardado con éxito"))
             dlg.exec()
 
     def open_add_deal_dialog(self):

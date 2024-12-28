@@ -1,8 +1,7 @@
 from PySide6.QtSql import QSqlQueryModel, QSqlQuery
 from PySide6.QtCore import Qt, Signal
 import sqlite3
-from utils import Paths, date_raw_format
-from datetime import datetime
+from utils import Paths, get_days_till_expiration
 
 class BatchModel(QSqlQueryModel):
     error = Signal()
@@ -26,12 +25,7 @@ class BatchModel(QSqlQueryModel):
                 return "-".join(date_info)
             elif index.column() == 6:
                 expiration_date_str = super().data(super().index(index.row(),5), Qt.DisplayRole)
-                expiration_date_obj = datetime.strptime(expiration_date_str, date_raw_format)
-                delta = expiration_date_obj - datetime.today()
-                delta_days = delta.days
-                if delta_days < 0:
-                    return "CADUCADO"
-                return delta_days
+                return get_days_till_expiration(expiration_date_str)
             return value
             
     def columnCount(self, index):

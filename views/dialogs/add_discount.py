@@ -57,28 +57,20 @@ class AddDiscountDialog(QDialog):
         subtitle2 = QLabel("Vigencia")
         subtitle2.setStyleSheet("font-weight: bold")
 
-        self.duration_option = QRadioButton("Duración (días):")
-        self.duration_option.setChecked(True)
         self.duration_input = QSpinBox()
         self.duration_input.setRange(1, 30)
 
         duration_layout = QHBoxLayout()
-        duration_layout.addWidget(self.duration_option)
+        duration_layout.addWidget(QLabel("Duración (días)"))
         duration_layout.addWidget(self.duration_input)
         
-        self.redeems_option = QRadioButton("Número de canjes:")
         self.redeems_input = QSpinBox()
         self.redeems_input.setRange(1, 999)
-        self.redeems_input.setEnabled(False)
 
         redeems_layout = QHBoxLayout()
-        redeems_layout.addWidget(self.redeems_option)
+        redeems_layout.addWidget(QLabel("Canjes"))
         redeems_layout.addWidget(self.redeems_input)
 
-        validity_option_button_group = QButtonGroup(self)
-        validity_option_button_group.setExclusive(True)
-        validity_option_button_group.addButton(self.duration_option)
-        validity_option_button_group.addButton(self.redeems_option)
 
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
@@ -99,12 +91,8 @@ class AddDiscountDialog(QDialog):
 
         button_box.accepted.connect(self.handle_accept)
         button_box.rejected.connect(self.close)
-
+        self.price_option.toggled.connect(lambda: self.price_input.setEnabled(not self.price_input.isEnabled()))
         self.price_option.toggled.connect(lambda: self.percentage_input.setEnabled(not self.percentage_input.isEnabled()))
-        self.price_option.toggled.connect(lambda: self.price_input.setEnabled(not self.percentage_input.isEnabled()))
-
-        self.duration_option.toggled.connect(lambda: self.duration_input.setEnabled(not self.duration_input.isEnabled()))
-        self.duration_option.toggled.connect(lambda: self.redeems_input.setEnabled(not self.redeems_input.isEnabled()))
 
         self.get_product_data()
 
@@ -141,44 +129,23 @@ class AddDiscountDialog(QDialog):
             if new_price:
                 duration = self.duration_input.value()
                 redeems = self.redeems_input.value()
-                if self.duration_option.isChecked() and duration:
-                    con = sqlite3.connect(Paths.test("db.db"))
-                    # con = sqlite3.connect(Paths.db())
-                    cur = con.cursor()
-                    expiration_date = get_expiration_date(duration)
-                    try:
-                        cur.execute("""
-                                    INSERT INTO discount (product_id, price, expiration_date, redeems) VALUES (?, ?, ?, ?)
-                                    """, (self.product_id, new_price, expiration_date, 0))
-                    except sqlite3.IntegrityError as e:
-                        print(e)
-                        QMessageBox.warning(self, "Error", "Ya existe un descuento para este producto.")
-                    except sqlite3.Error as e:
-                        print(e)
-                        QMessageBox.critical(self, "Error", "Ha ocurrido un error. Comuníquese con el administrador.")
-                    else:
-                        con.commit()
-                        self.close()
-                elif self.redeems_option.isChecked() and redeems:
-                    con = sqlite3.connect(Paths.test("db.db"))
-                    # con = sqlite3.connect(Paths.db())
-                    cur = con.cursor()
-                    expiration_date = get_expiration_date(30)
-                    try:
-                        cur.execute("""
-                                    INSERT INTO discount (product_id, price, redeems, expiration_date) VALUES (?, ?, ?, ?)
-                                    """, (self.product_id, new_price, redeems, expiration_date))
-                    except sqlite3.IntegrityError as e:
-                        print(e)
-                        QMessageBox.warning(self, "Error", "Ya existe un descuento para este producto.")
-                    except sqlite3.Error as e:
-                        print(e)
-                        QMessageBox.critical(self, "Error", "Ha ocurrido un error. Comuníquese con el administrador.")
-                    else:
-                        con.commit()
-                        self.close()
+                con = sqlite3.connect(Paths.test("db.db"))
+                # con = sqlite3.connect(Paths.db())
+                cur = con.cursor()
+                expiration_date = get_expiration_date(duration)
+                try:
+                    cur.execute("""
+                                INSERT INTO discount (product_id, price, expiration_date, redeems) VALUES (?, ?, ?, ?)
+                                """, (self.product_id, new_price, expiration_date, redeems))
+                except sqlite3.IntegrityError as e:
+                    print(e)
+                    QMessageBox.warning(self, "Error", "Ya existe un descuento para este producto.")
+                except sqlite3.Error as e:
+                    print(e)
+                    QMessageBox.critical(self, "Error", "Ha ocurrido un error. Comuníquese con el administrador.")
                 else:
-                    QMessageBox.information(self, "Datos inválidos", "Ingrese una cantidad válida.")
+                    con.commit()
+                    self.close()
             else:
                 QMessageBox.information(self, "Datos inválidos", "Ingrese un monto válido.")
         else:

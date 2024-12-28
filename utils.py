@@ -409,8 +409,6 @@ def update_discount(products, discounts):
         con = sqlite3.connect(Paths.test("db.db"))
         # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
-        if redeems == 0:
-            return True
         if available_redeems <= 0:
             print("REDEEMS EXPIRED")
             try:
@@ -483,6 +481,28 @@ def create_csv_file(data, headers, folder_path, filename):
         for row in data:
             writer.writerow(row)
 
+def get_datetime_till_expiration(exp_date_str):
+    expiration_date_obj = datetime.strptime(exp_date_str, datetime_raw_format)
+    delta = expiration_date_obj - datetime.now()
+    delta_days = delta.days
+    delta_seconds = delta.seconds
+    delta_hours = int(delta_seconds / 3600)
+    if delta_hours:
+        dt_str = f"{delta_days} días {delta_hours} horas"
+    else:
+        dt_str = f"{delta_days} días"
+    if expiration_date_obj < datetime.now():
+        return "VENCIDO"
+    return dt_str
+
+def get_days_till_expiration(exp_date_str):
+    expiration_date_obj = datetime.strptime(exp_date_str, date_raw_format)
+    delta = expiration_date_obj - datetime.today()
+    delta_days = delta.days
+    if delta_days < 0:
+        return "CADUCADO"
+    return delta_days
+
 # SETTINGS
 import json
 def load_settings():
@@ -531,6 +551,7 @@ product_categories = [
 ]
 
 date_raw_format = "%Y-%m-%d"
+datetime_raw_format = "%Y-%m-%d %H:%M:%S.%f"
 date_format = "%d-%m-%Y"
 
 

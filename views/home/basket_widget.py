@@ -73,7 +73,7 @@ class BasketWidget(QWidget):
 
         # SIGNALS
         self.model.total_calculated.connect(lambda total: self.amount_label.setText("${}".format(total)))
-        self.model.success.connect(lambda: self.del_btn.setEnabeld(False))
+        self.model.success.connect(lambda: self.del_btn.setEnabled(False))
         self.model.success.connect(lambda: self.edit_btn.setEnabled(False))
         self.model.deal_available.connect(lambda deal_str: QMessageBox.information(self, "Promoción Encotrada", f"Hay una promoción {deal_str} para este producto."))
         self.table.clicked.connect(self.on_clicked_row)
