@@ -53,11 +53,11 @@ class BasketModel(QAbstractTableModel):
                 first_amount = deal_data["first_amount"]
                 second_amount = deal_data["second_amount"]
                 if amount >= first_amount:
-                    n = int(amount / first_amount)
-                    residue = amount - n*first_amount 
+                    n = int(amount / second_amount)
+                    residue = amount - n*second_amount 
                     original_price = item_data[3]
                     new_price = second_amount * original_price
-                    item_data[1] = f"{item_data[1]} {first_amount} x {second_amount}"
+                    item_data[1] = f"{item_data[1]} ({first_amount} x {second_amount})"
                     item_data[3] = new_price
                     item_data[4] = n
                     self.deals.append({len(self._data): deal_data["redeems"]})
@@ -72,7 +72,7 @@ class BasketModel(QAbstractTableModel):
                     n_deal = int(amount / deal_amount)
                     residue = amount - n_deal * deal_amount
                     new_price = deal_price * n_deal
-                    item_data[1] = f"{item_data[1]} {deal_amount} x {deal_price}"
+                    item_data[1] = f"{item_data[1]} ({deal_amount} x ${deal_price})"
                     item_data[3] = new_price
                     item_data[4] = n_deal
                     self.deals.append({len(self._data): deal_data["redeems"]})
