@@ -60,11 +60,11 @@ class AddItemDialog(QDialog):
     
     def validate_input(self):
         self.message_label.hide()
-        name = self.name_input.text()
-        brand = self.brand_input.text()
+        name = self.name_input.text().strip()
+        brand = self.brand_input.text().strip()
         price = self.price_input.value()
         category = self.category_input.currentText()
-        code = self.code_input.text()
+        code = self.code_input.text().strip()
         if name and price > 0 and category != self.categories[0]:
             name = name.lower()
             brand= brand.lower()

@@ -193,7 +193,7 @@ class AdminWindow(QWidget):
             QMessageBox.information(self, "Error", "Ha ocurrido un error. Contacte al administrador")
 
     def add_category(self):
-        new_category = self.new_category_input.text()
+        new_category = self.new_category_input.text().strip()
         if new_category:
             if new_category not in self.settings["gui"]["product_categories"]:
                 self.settings["gui"]["product_categories"].append(new_category)
