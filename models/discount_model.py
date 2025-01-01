@@ -39,6 +39,20 @@ class DiscountModel(QSqlQueryModel):
             self.setQuery(Qquery)
             self.success.emit()
 
+    def refresh_table(self):
+        if self.filter:
+            self.search(self.search_str, self.filter)
+        else:
+            query = """
+            SELECT discount.id, product.name, discount.price, discount.expiration_date, discount.redeems FROM discount
+            JOIN product ON  discount.product_id = product.id
+            ORDER BY discount.redeems
+            LIMIT 50
+        """
+            Qquery = QSqlQuery(query, db=self.db)
+            self.setQuery(Qquery)
+            self.success.emit()
+
     def headerData(self, section, orientation, role):
            if role == Qt.DisplayRole:
                if orientation == Qt.Horizontal:

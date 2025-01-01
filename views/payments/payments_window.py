@@ -69,6 +69,11 @@ class PaymentsWindow(QWidget):
             grid.addWidget(self.menu, 2, 9, 5, 3)
             grid.addLayout(buttons_layout, 11, 0, 1, 9)
             grid.addWidget(self.filler, 1, 0, 11, 5)
+            for i in range(12):
+                  grid.setColumnStretch(i, 1)
+            for j in range(12):
+                  grid.setRowStretch(j, 1)
+                  
             self.setLayout(grid)
 
             self.load_settings()

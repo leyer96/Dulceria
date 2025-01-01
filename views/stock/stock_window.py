@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QScreen
 from views.home.search_widget import SearchWidget
 from models.stock_model import StockModel
 from models.batch_model import BatchModel
@@ -90,6 +90,11 @@ class StockWindow(QWidget):
         grid.addWidget(self.batch_table, 7, 0, 4, 9)
         grid.addLayout(buttons_layout, 11, 0, 1, 9)
         grid.addWidget(self.menu, 2, 9, 5, 3)
+
+        for i in range(12):
+            grid.setColumnStretch(i, 1)
+        for j in range(12):
+            grid.setRowStretch(j, 1)
         
         self.setLayout(grid)
 
@@ -188,3 +193,11 @@ class StockWindow(QWidget):
             self.resolve_batch_btn.hide()
         else:
             self.resolve_batch_btn.show()
+        if not settings["permissions"]["stock_window"]["add_discount"]:
+            self.add_discount_btn.hide()
+        else:
+            self.add_discount_btn.show()
+        if not settings["permissions"]["stock_window"]["add_deal"]:
+            self.add_deal_btn.hide()
+        else:
+            self.add_deal_btn.show()

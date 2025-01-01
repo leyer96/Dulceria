@@ -5,7 +5,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QComboBox,
     QLabel,
-    QSpinBox,
     QWidget,
     QGridLayout,
     QSizePolicy,
@@ -14,8 +13,8 @@ from PySide6.QtWidgets import (
     QLineEdit
 )
 from PySide6.QtCore import Qt, Signal
-from utils import Paths, load_settings, save_settings
-import json
+from PySide6.QtGui import QScreen
+from utils import load_settings, save_settings
 
 class AdminWindow(QWidget):
     new_settings = Signal()
@@ -41,9 +40,15 @@ class AdminWindow(QWidget):
         self.stock_edit_option = QCheckBox("Modificar stock")
         self.stock_add_option = QCheckBox("Añadir lote")
         self.stock_resolve_option = QCheckBox("Resolver")
+        self.stock_add_deal_option = QCheckBox("Añadir promocióm")
+        self.stock_add_discount_option = QCheckBox("Añadir descuento")
 
         col3_title = QLabel("Pagos")
         self.payment_view_option = QCheckBox("Ver pagos")
+
+        col4_title = QLabel("Promociones")
+        self.deal_delete_discount_option = QCheckBox("Eliminar descuento")
+        self.deal_delete_deal_option = QCheckBox("Eliminar promoción")
 
         col1_layout = QVBoxLayout()
         col1_layout.addWidget(col1_title)
@@ -56,10 +61,17 @@ class AdminWindow(QWidget):
         col2_layout.addWidget(self.stock_edit_option)
         col2_layout.addWidget(self.stock_add_option)
         col2_layout.addWidget(self.stock_resolve_option)
+        col2_layout.addWidget(self.stock_add_discount_option)
+        col2_layout.addWidget(self.stock_add_deal_option)
 
         col3_layout = QVBoxLayout()
         col3_layout.addWidget(col3_title)
         col3_layout.addWidget(self.payment_view_option)
+
+        col4_layout = QVBoxLayout()
+        col4_layout.addWidget(col4_title)
+        col4_layout.addWidget(self.deal_delete_discount_option)
+        col4_layout.addWidget(self.deal_delete_deal_option)
 
         save_permissions_btn = QPushButton("Guardar permisos")
         save_permissions_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
@@ -68,10 +80,12 @@ class AdminWindow(QWidget):
         options_layout.addLayout(col1_layout)
         options_layout.addLayout(col2_layout)
         options_layout.addLayout(col3_layout)
+        options_layout.addLayout(col4_layout)
 
         options_layout.setAlignment(col1_layout, Qt.AlignTop)
         options_layout.setAlignment(col2_layout, Qt.AlignTop)
         options_layout.setAlignment(col3_layout, Qt.AlignTop)
+        options_layout.setAlignment(col4_layout, Qt.AlignTop)
 
         # CATEGORIES
 
@@ -105,6 +119,11 @@ class AdminWindow(QWidget):
         hidden_layout.addWidget(add_category_btn)
         hidden_layout.addLayout(delete_category_layout)
         hidden_layout.addWidget(delete_category_btn)
+
+        # TEST
+        test_btn = QPushButton("TEST")
+        test_btn.clicked.connect(lambda: print(f"AVAILABLE SPACE{QScreen.availableSize()}"))
+        hidden_layout.addWidget(test_btn)
 
         hidden_layout.setAlignment(save_permissions_btn, Qt.AlignHCenter)
         hidden_layout.setAlignment(add_category_btn, Qt.AlignHCenter)
@@ -143,6 +162,11 @@ class AdminWindow(QWidget):
         grid.addWidget(self.menu, 2, 9, 5, 3)
         self.setLayout(grid)
 
+        for i in range(12):
+            grid.setColumnStretch(i, 1)
+        for j in range(12):
+            grid.setRowStretch(j, 1)
+
         # CONFIG
         self.menu.go_to_admin_window_btn.setEnabled(False)
         self.load_settings()
@@ -173,8 +197,16 @@ class AdminWindow(QWidget):
             self.stock_add_option.setChecked(True)
         if settings["permissions"]["stock_window"]["resolve"]:
             self.stock_resolve_option.setChecked(True)
+        if settings["permissions"]["stock_window"]["add_discount"]:
+            self.stock_add_discount_option.setChecked(True)
+        if settings["permissions"]["stock_window"]["add_deal"]:
+            self.stock_add_deal_option.setChecked(True)
         if settings["permissions"]["payments_window"]["view"]:
             self.payment_view_option.setChecked(True)
+        if settings["permissions"]["deals_window"]["delete_deal"]:
+            self.deal_delete_deal_option.setChecked(True)
+        if settings["permissions"]["deals_window"]["delete_discount"]:
+            self.deal_delete_discount_option.setChecked(True)
         self.select_category_input.addItems(settings["gui"]["product_categories"])
     
     def save_permissions(self):
@@ -184,7 +216,11 @@ class AdminWindow(QWidget):
         self.settings["permissions"]["stock_window"]["edit"] = self.stock_edit_option.isChecked()
         self.settings["permissions"]["stock_window"]["add"] = self.stock_add_option.isChecked()
         self.settings["permissions"]["stock_window"]["resolve"] = self.stock_resolve_option.isChecked()
+        self.settings["permissions"]["stock_window"]["add_discount"] = self.stock_add_discount_option.isChecked()
+        self.settings["permissions"]["stock_window"]["add_deal"] = self.stock_add_deal_option.isChecked()
         self.settings["permissions"]["payments_window"]["view"] = self.payment_view_option.isChecked()
+        self.settings["permissions"]["deals_window"]["delete_deal"] = self.deal_delete_deal_option.isChecked()
+        self.settings["permissions"]["deals_window"]["delete_discount"] = self.deal_delete_discount_option.isChecked()
         saved = save_settings(self.settings)
         if saved:
             QMessageBox.information(self, "Permisos Guardados", "Los permisos han sido guardados con éxito")

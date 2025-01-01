@@ -38,6 +38,10 @@ class MainWindow(QMainWindow):
                     continue
                 wi = initialized_window[i]
                 wj = initialized_window[j]
+                if isinstance(wi, HomeWindow):
+                    if isinstance(wj, DealsWindow):
+                        wi.checkout.payment_saved.connect(wj.deal_model.refresh_table)
+                        wi.checkout.payment_saved.connect(wj.discount_model.refresh_table)
                 if isinstance(wi, StockWindow):
                     wj.menu.go_to_stock.connect(wi.stock_model.get_all_stock)
                     wj.menu.go_to_stock.connect(wi.batch_model.get_all_batchs)
@@ -50,4 +54,4 @@ class MainWindow(QMainWindow):
         container.setLayout(container_layout)
         
         self.setCentralWidget(container)
-        self.show()
+        self.showFullScreen()

@@ -53,7 +53,7 @@ def create_test_tables():
         CREATE TABLE IF NOT EXISTS product (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(100) NOT NULL UNIQUE,
-                brand VARCHAR(50) NOT NULL UNIQUE,
+                brand VARCHAR(50),
                 price FLOAT NOT NULL,
                 category VARCHAR(20) NOT NULL,
                 code TEXT UNIQUE
@@ -137,7 +137,7 @@ def create_db_tables():
         CREATE TABLE IF NOT EXISTS product (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(100) NOT NULL UNIQUE,
-                brand VARCHAR(50) NOT NULL UNIQUE,
+                brand VARCHAR(50),
                 price FLOAT NOT NULL,
                 category VARCHAR(20) NOT NULL,
                 code TEXT UNIQUE
@@ -381,89 +381,92 @@ def get_deal(product_id):
     else:
         return False
 
-def substract_from_stock(products):
+def substract_from_stock(products, deals_0, deals_1):
     con = sqlite3.connect(Paths.test("db.db"))
     # con = sqlite3.connect(Paths.db())
     cur = con.cursor()
-    for product in products:
-        product_id = product[0]
-        amount = product[4]
-        prev_amount = cur.execute("SELECT amount from stock where stock.product_id = ?", (product_id,)).fetchone()[0]
-        if prev_amount > 0:
-            new_amount = int(prev_amount - amount)
-            cur.execute("UPDATE stock SET amount = ? WHERE stock.product_id = ?", (new_amount, product_id))
-        else:
-            print("ERROR DE EMPAREJAMIENTO CON STOCK REAL")
-    con.commit()
-    return True
+    try:
+        for product in products:
+            product_id = product[0]
+            name = product[1]
+            amount = product[4]
+            prev_amount = cur.execute("SELECT amount FROM stock WHERE stock.product_id = ?", (product_id,)).fetchone()[0]
+            if product_id in deals_0 or product_id in deals_1:
+                og_name = cur.execute("SELECT name FROM product WHERE id = ?", (product_id,)).fetchone()[0]
+                if name != og_name:
+                    if product_id in deals_0:
+                        times = cur.execute("SELECT first_amount FROM deal WHERE product_id = ?", (product_id,)).fetchone()[0]
+                        amount = amount * times
+                    else:
+                        times = cur.execute("SELECT amount FROM deal WHERE product_id = ?", (product_id,)).fetchone()[0]
+                        amount = amount * times
+            if prev_amount > 0:
+                new_amount = int(prev_amount - amount)
+                cur.execute("UPDATE stock SET amount = ? WHERE stock.product_id = ?", (new_amount, product_id))
+            else:
+                print("ERROR DE EMPAREJAMIENTO CON STOCK REAL")
+                return False
+    except sqlite3.Error as e:
+        print(e)
+        return False
+    else:
+        con.commit()
+        return True
 
 def update_discount(products, discounts):
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
     if not discounts:
         return True
-    for discount in discounts:
-        product_index = list(discount.keys())[0]
-        redeems = discount[product_index]
-        product_id = products[product_index][0]
-        amount = products[product_index][4]
-        available_redeems = redeems - amount
-        con = sqlite3.connect(Paths.test("db.db"))
-        # con = sqlite3.connect(Paths.db())
-        cur = con.cursor()
-        if available_redeems <= 0:
-            print("REDEEMS EXPIRED")
-            try:
-                cur.execute("DELETE FROM discount WHERE product_id = ?", (product_id,))
-            except sqlite3.Error as e:
-                print(e)
-                return False
-            else:
-                con.commit()
-                return True
-        else:
-            print("REEDEMS UPDATING")
-            try:
-                cur.execute("UPDATE discount SET redeems = ? WHERE product_id = ?", (available_redeems, product_id))
-            except sqlite3.Error as e:
-                print(e)
-                return False
-            else:
-                con.commit()
-                return True
+    try:
+        for product in products:
+            product_id = product[0]
+            if product_id in discounts:
+                redeems = product[4]
+                available_redeems = cur.execute("SELECT redeems FROM discount WHERE product_id = ?", (product_id,)).fetchone()[0]
+                new_available_redeems = available_redeems - redeems
+                if new_available_redeems <= 0:
+                    print("REDEEMS EXPIRED")
+                    cur.execute("DELETE FROM discount WHERE product_id = ?", (product_id,))
+                else:
+                    print("REEDEMS UPDATING")
+                    cur.execute("UPDATE discount SET redeems = ? WHERE product_id = ?", (new_available_redeems, product_id))
+    except sqlite3.Error as e:
+        print(e)
+        return False
+    else:
+        con.commit()
+        return True
 
 def update_deal(products, deals):
     if not deals:
         return True
-    for deal in deals:
-        product_index = list(deal.keys())[0]
-        redeems = deal[product_index]
-        product_id = products[product_index][0]
-        amount = products[product_index][4]
-        available_redeems = redeems - amount
-        con = sqlite3.connect(Paths.test("db.db"))
-        # con = sqlite3.connect(Paths.db())
-        cur = con.cursor()
-        if redeems == 0:
-            return True
-        if available_redeems <= 0:
-            print("REDEEMS EXPIRED")
-            try:
-                cur.execute("DELETE FROM deal WHERE product_id = ?", (product_id,))
-            except sqlite3.Error as e:
-                print(e)
-                return False
-            else:
-                con.commit()
-                return True
-        else:
-            print("REEDEMS UPDATING")
-            try:
-                cur.execute("UPDATE deal SET redeems = ? WHERE product_id = ?", (available_redeems, product_id))
-            except sqlite3.Error as e:
-                print(e)
-                return False
-            else:
-                con.commit()
-                return True
+    con = sqlite3.connect(Paths.test("db.db"))
+    # con = sqlite3.connect(Paths.db())
+    cur = con.cursor()
+    try:
+        for product in products:
+            product_id = product[0]
+            name = product[1]
+            if product_id in deals:
+                og_name = cur.execute("SELECT name FROM product WHERE id = ?", (product_id,)).fetchone()[0]
+                if name != og_name:
+                    redeems = product[4]
+                    available_redeems = cur.execute("SELECT redeems FROM deal WHERE product_id = ?", (product_id,)).fetchone()[0]
+                    new_available_redeems = available_redeems - redeems
+                    if new_available_redeems <= 0:
+                        print("REDEEMS EXPIRED")
+                        cur.execute("DELETE FROM deal WHERE product_id = ?", (product_id,))
+                    else:
+                        print("REEDEMS UPDATING")
+                        cur.execute("UPDATE deal SET redeems = ? WHERE product_id = ?", (new_available_redeems, product_id))
+    except sqlite3.Error as e:
+        print(e)
+        return False
+    else:
+        con.commit()
+        return True
 
 def get_expiration_date(days):
     today = datetime.today()
@@ -496,6 +499,8 @@ def get_datetime_till_expiration(exp_date_str):
     return dt_str
 
 def get_days_till_expiration(exp_date_str):
+    if exp_date_str == no_exipration_date_date:
+        return "SIN CADUCIDAD"
     expiration_date_obj = datetime.strptime(exp_date_str, date_raw_format)
     delta = expiration_date_obj - datetime.today()
     delta_days = delta.days
@@ -553,6 +558,7 @@ product_categories = [
 date_raw_format = "%Y-%m-%d"
 datetime_raw_format = "%Y-%m-%d %H:%M:%S.%f"
 date_format = "%d-%m-%Y"
+no_exipration_date_date = "2111-11-11"
 
 
 

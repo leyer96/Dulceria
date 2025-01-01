@@ -60,8 +60,9 @@ class DealModel(QSqlQueryModel):
             self.search(self.search_str, self.filter)
         else:
             query = """
-            SELECT * FROM product_test
-            ORDER BY NAME
+            SELECT deal.id, product.name, deal.type, deal.first_amount, deal.second_amount, deal.amount, deal.price, deal.expiration_date, deal.redeems FROM deal
+            JOIN product ON deal.product_id = product.id
+            ORDER BY deal.redeems
             LIMIT 50
             """
             Qquery = QSqlQuery(query, db=self.db)

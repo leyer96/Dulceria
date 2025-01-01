@@ -9,10 +9,11 @@ from PySide6.QtWidgets import (
     QComboBox,
     QRadioButton,
     QLineEdit,
-    QHBoxLayout
+    QHBoxLayout,
+    QMessageBox
 )
 from PySide6.QtCore import QDate, QLocale, Signal, Qt
-from utils import Paths
+from utils import Paths, no_exipration_date_date
 import sqlite3
 
 class AddBatchDialog(QDialog):
@@ -80,13 +81,18 @@ class AddBatchDialog(QDialog):
         con = sqlite3.connect(Paths.test("db.db"))
         # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
-        products = cur.execute("SELECT id, name, brand, code from product")
+        products = []
+        try:
+            products = cur.execute("SELECT id, name, brand, code FROM product").fetchall()
+        except sqlite3.Error as e:
+            print(e)
+            QMessageBox.critical(self, "Error", "Ha ocurrido un error. Contacte al administrador.")
         display_names = []
         ids = []
         for product in products:
             ids.append(product[0])
             display_names.append(f"{product[2]} {product[1]}")
-            self.codes.append(product[2])
+            self.codes.append(product[3])
         self.product_input.addItems(display_names)
         self.display_names = display_names
         self.ids = ids
@@ -125,7 +131,7 @@ class AddBatchDialog(QDialog):
         product = self.product_input.currentText()
         product_id = self.ids[product_index]
         amount = self.amount_input.value()
-        date_str = self.expiration_date_input.date().toString("yyyy-MM-dd")
+        date_str = no_exipration_date_date if self.no_exipration_option.isChecked() else self.expiration_date_input.date().toString("yyyy-MM-dd")
         try:
             stock_id = cur.execute("SELECT id FROM stock WHERE product_id = ?", (product_id,)).fetchone()[0]
             try:

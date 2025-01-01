@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QPushButton,
     QWidget,
-    QHBoxLayout,
+    QMessageBox,
     QLabel
 )
 from PySide6.QtCore import Qt
@@ -14,6 +14,7 @@ from views.home.search_widget import SearchWidget
 from models.discount_model import DiscountModel
 from models.deal_model import DealModel
 from utils import Paths, load_settings
+import sqlite3
 
 class DealsWindow(QWidget):
     def __init__(self, db, menu):
@@ -62,12 +63,8 @@ class DealsWindow(QWidget):
         self.deal_model.error.connect(lambda: self.delete_deal_btn.setEnabled(False))
         self.discount_model.success.connect(lambda: self.delete_discount_btn.setEnabled(False))
         self.discount_model.error.connect(lambda: self.delete_discount_btn.setEnabled(False))
-        
-        # LAYOUT
-        # buttons_layout = QHBoxLayout()
-        # buttons_layout.addWidget(btn)
-        # buttons_layout.addWidget(btn)
-        # buttons_layout.addWidget(btn)
+        self.delete_deal_btn.clicked.connect(self.delete_deal)
+        self.delete_discount_btn.clicked.connect(self.delete_discount)
 
         grid = QGridLayout()
         grid.addWidget(deals_title, 0, 0, 1, 12)
@@ -78,6 +75,11 @@ class DealsWindow(QWidget):
         grid.addWidget(self.discount_table, 7, 0, 4, 9)
         grid.addWidget(self.delete_discount_btn, 11, 0, 1, 9)
         grid.addWidget(self.menu, 2, 9, 5, 3)
+        
+        for i in range(12):
+            grid.setColumnStretch(i, 1)
+        for j in range(12):
+            grid.setRowStretch(j, 1)
         
         self.setLayout(grid)
 
@@ -117,60 +119,48 @@ class DealsWindow(QWidget):
             if not self.delete_discount_btn.isEnabled():
                 self.delete_discount_btn.setEnabled(True)
 
-    def open_edit_stock_dialog(self):
-        row = self.selected_stock_row
-        if row != -1:
-            product_id = self.stock_model.data(self.stock_model.index(row, 0), Qt.DisplayRole)
-            product = self.stock_model.data(self.stock_model.index(row, 1), Qt.DisplayRole)
-            brand = self.stock_model.data(self.stock_model.index(row, 2), Qt.DisplayRole)
-            amount = self.stock_model.data(self.stock_model.index(row, 4), Qt.DisplayRole)
-            product_data = {
-                "product_id": product_id,
-                "product": product,
-                "brand": brand,
-                "amount": amount
-            }
-            dlg = EditStockDialog(product_data)
-            dlg.saved.connect(lambda: self.resolve_batch_btn.setEnabled(False))
-            dlg.saved.connect(lambda: self.edit_stock_btn.setEnabled(False))
-            dlg.saved.connect(self.stock_model.refresh_table)
-            dlg.saved.connect(self.batch_model.refresh_table)
-            dlg.exec()  
-    
-    def open_add_batch_dialog(self):
-        dlg = AddBatchDialog()
-        dlg.saved.connect(lambda: self.resolve_batch_btn.setEnabled(False))
-        dlg.saved.connect(lambda: self.edit_stock_btn.setEnabled(False))
-        dlg.saved.connect(self.stock_model.refresh_table)
-        dlg.saved.connect(self.batch_model.refresh_table)
-        dlg.exec()
+    def delete_deal(self):
+        deal_id = self.deal_model.data(self.deal_model.index(self.selected_deal_row, 0), Qt.DisplayRole)
+        deal = self.deal_model.data(self.deal_model.index(self.selected_deal_row, 2), Qt.DisplayRole)
+        product = self.deal_model.data(self.deal_model.index(self.selected_deal_row, 1), Qt.DisplayRole)
+        answer = QMessageBox.question(self, "Eliminar Promoción", f"¿Eliminar promoción: {deal} para {product}?")
+        if answer == QMessageBox.Yes:
+            con = sqlite3.connect(Paths.test("db.db"))
+            # con = sqlite3.connect(Paths.db())
+            cur = con.cursor()
+            try:
+                cur.execute("DELETE FROM deal WHERE id = ?", (deal_id,))
+            except sqlite3.Error as e:
+                print(e)
+                QMessageBox.alert(self, "Error", "Ha ocurrido un error. Contacte al administrador.")
+            else:
+                con.commit()
+                self.deal_model.refresh_table()
 
-    def open_discount_dialog(self):
-        row = self.selected_batch_row
-        if row != -1:
-            batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
-            dlg = AddDiscountDialog(batch_id)
-            dlg.saved.connect(self.stock_model.refresh_table)
-            dlg.saved.connect(self.batch_model.refresh_table)
-            dlg.exec()
-
-    def resolve_batch(self):
-        row = self.selected_batch_row
-        if row > -1:
-            batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
-            self.batch_model.update_batch_show_status(batch_id)
+    def delete_discount(self):
+        discount_id = self.discount_model.data(self.discount_model.index(self.selected_discount_row, 0), Qt.DisplayRole)
+        product = self.discount_model.data(self.discount_model.index(self.selected_discount_row, 1), Qt.DisplayRole)
+        answer = QMessageBox.question(self, "Eliminar Promoción", f"¿Eliminar descuento para {product}?")
+        if answer == QMessageBox.Yes:
+            con = sqlite3.connect(Paths.test("db.db"))
+            # con = sqlite3.connect(Paths.db())
+            cur = con.cursor()
+            try:
+                cur.execute("DELETE FROM discount WHERE id = ?", (discount_id,))
+            except sqlite3.Error as e:
+                print(e)
+                QMessageBox.alert(self, "Error", "Ha ocurrido un error. Contacte al administrador.")
+            else:
+                con.commit()
+                self.discount_model.refresh_table()
 
     def load_settings(self):
         settings = load_settings()
-        # if not settings["permissions"]["stock_window"]["edit"]:
-        #     self.edit_stock_btn.hide()
-        # else:
-        #     self.edit_stock_btn.show()
-        # if not settings["permissions"]["stock_window"]["add"]:
-        #     self.add_batch_btn.hide()
-        # else:
-        #     self.add_batch_btn.show()
-        # if not settings["permissions"]["stock_window"]["resolve"]:
-        #     self.resolve_batch_btn.hide()
-        # else:
-        #     self.resolve_batch_btn.show()
+        if not settings["permissions"]["deals_window"]["delete_discount"]:
+            self.delete_discount_btn.hide()
+        else:
+            self.delete_discount_btn.show()
+        if not settings["permissions"]["deals_window"]["delete_deal"]:
+            self.delete_deal_btn.hide()
+        else:
+            self.delete_deal_btn.show()

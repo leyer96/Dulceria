@@ -73,12 +73,13 @@ class BasketWidget(QWidget):
 
         # SIGNALS
         self.model.total_calculated.connect(lambda total: self.amount_label.setText("${}".format(total)))
-        self.model.success.connect(lambda: self.del_btn.setEnabled(False))
-        self.model.success.connect(lambda: self.edit_btn.setEnabled(False))
+        self.model.layoutChanged.connect(lambda: self.del_btn.setEnabled(False))
+        self.model.layoutChanged.connect(lambda: self.edit_btn.setEnabled(False))
+        self.model.layoutChanged.connect(self.table.clearSelection)
         self.model.deal_available.connect(lambda deal_str: QMessageBox.information(self, "Promoción Encotrada", f"Hay una promoción {deal_str} para este producto."))
         self.table.clicked.connect(self.on_clicked_row)
         self.edit_btn.clicked.connect(self.select_amount)
-        self.del_btn.clicked.connect(self.delete_item)
+        self.del_btn.clicked.connect(lambda: self.model.delete_item(self.selected_row))
         confirm_btn.clicked.connect(self.open_payment_dialog)
 
         # PROPS
@@ -107,19 +108,8 @@ class BasketWidget(QWidget):
 
     def update_amount(self, row, amount):
         self.model._data[row][4] = amount
-        self.model.calculate_total()
         self.model.layoutChanged.emit()
-
-    def delete_item(self, row):
-        row = self.selected_row
-        if row != None:
-            # MOVE METHOD TO MODEL ???
-            del(self.model._data[row])
-            self.del_btn.setEnabled(False)
-            self.edit_btn.setEnabled(False)
-            self.table.clearSelection()
-            self.model.calculate_total()
-            self.model.layoutChanged.emit()
+        self.model.calculate_total()
 
     def open_payment_dialog(self):
         if len(self.model._data) > 0:
@@ -146,11 +136,14 @@ class BasketWidget(QWidget):
     def save_payment(self, payment_data):
         products = self.model._data
         discounts = self.model.discounts
-        deals = self.model.deals
+        deals_0 = self.model.deals_0
+        deals_1 = self.model.deals_1
+        print(f"IDS IN DEALS 0: {deals_0}")
+        print(f"IDS IN DEALS 1: {deals_1}")
         successful_payment = save_payment(payment_data, products)
-        successful_stock_update = substract_from_stock(products)
+        successful_stock_update = substract_from_stock(products, deals_0, deals_1)
         succesful_discount_update = update_discount(products, discounts)
-        succesful_deal_update = update_deal(products, deals)
+        succesful_deal_update = update_deal(products, deals_0 + deals_1)
         messages = []
         if successful_payment:
             self.model.reset_basket()
@@ -167,7 +160,7 @@ class BasketWidget(QWidget):
                     messages.append("Canje de descuento actualizado exitosamente.")
                 else:
                     messages.append("Error al actualizar canjes de descuento.")
-            if deals:
+            if deals_0 or deals_1:
                 if succesful_deal_update:
                     messages.append("Canje de promoción actualizado exitosamente.")
                 else:

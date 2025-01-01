@@ -1,7 +1,7 @@
 from PySide6.QtSql import QSqlQueryModel, QSqlQuery
 from PySide6.QtCore import Qt, Signal
 import sqlite3
-from utils import Paths, get_days_till_expiration
+from utils import Paths, get_days_till_expiration, no_exipration_date_date
 
 class BatchModel(QSqlQueryModel):
     error = Signal()
@@ -20,6 +20,8 @@ class BatchModel(QSqlQueryModel):
             if index.column() == 1 or index.column() == 2:
                 return value.capitalize()
             elif index.column() == 5:
+                if value == no_exipration_date_date:
+                    return ""
                 date_info = value.split("-")
                 date_info.reverse()
                 return "-".join(date_info)
@@ -71,7 +73,8 @@ class BatchModel(QSqlQueryModel):
             self.get_all_batchs()
 
     def update_batch_show_status(self, batch_id):
-        con = sqlite3.connect(Paths.db())
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         try:
             cur.execute("UPDATE batch SET show = ? WHERE id = ?", (0, batch_id))

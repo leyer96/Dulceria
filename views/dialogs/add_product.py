@@ -60,8 +60,8 @@ class AddItemDialog(QDialog):
     
     def validate_input(self):
         self.message_label.hide()
-        name = self.name_input.text().strip()
-        brand = self.brand_input.text().strip()
+        name = self.name_input.text().strip().lower()
+        brand = self.brand_input.text().strip().lower()
         price = self.price_input.value()
         category = self.category_input.currentText()
         code = self.code_input.text().strip()
@@ -98,7 +98,6 @@ class AddItemDialog(QDialog):
         con = sqlite3.connect(Paths.test("db.db"))
         # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
-        # CHECK TRY-EXCEPT BLOCK --> MAYBE MOVE SQL COMMITS TO ELSE BLOCK
         try:
             cur.execute("""
                 INSERT INTO product (name, brand, price, category, code) VALUES(?,?,?,?,?)

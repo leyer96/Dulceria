@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QWidget, QPushButton, QVBoxLayout
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtWidgets import QWidget, QPushButton, QVBoxLayout, QSizePolicy
+from PySide6.QtCore import Signal, Qt, QSize
 from PySide6.QtGui import QIcon, QCursor
 from utils import Paths
 
@@ -34,6 +34,19 @@ class Menu(QWidget):
         self.go_to_deals_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.go_to_admin_window_btn.setCursor(QCursor(Qt.PointingHandCursor))
 
+
+        btn_size = QSize(120, 40)
+
+        self.go_to_admin_window_btn.setFixedSize(btn_size)
+        self.go_to_products_btn.setFixedSize(btn_size)
+        self.go_to_home_btn.setFixedSize(btn_size)
+        self.go_to_stock_btn.setFixedSize(btn_size)
+        self.go_to_payments_btn.setFixedSize(btn_size)
+        self.go_to_deals_btn.setFixedSize(btn_size)
+        self.go_to_admin_window_btn.setFixedSize(btn_size)
+
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Maximum)
+
         layout = QVBoxLayout()
         layout.addWidget(self.go_to_home_btn)
         layout.addWidget(self.go_to_products_btn)
@@ -41,6 +54,8 @@ class Menu(QWidget):
         layout.addWidget(self.go_to_stock_btn)
         layout.addWidget(self.go_to_deals_btn)
         layout.addWidget(self.go_to_admin_window_btn)
+
+        layout.setSpacing(1)
 
         layout.setAlignment(self.go_to_home_btn, Qt.AlignHCenter)
         layout.setAlignment(self.go_to_products_btn, Qt.AlignHCenter)

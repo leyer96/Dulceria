@@ -52,7 +52,7 @@ class SearchModel(QSqlQueryModel):
             self.search(self.search_str, self.filter)
         else:
             query = """
-            SELECT * FROM product_test
+            SELECT * FROM product
             ORDER BY NAME
             LIMIT 50
             """
@@ -65,7 +65,7 @@ class SearchModel(QSqlQueryModel):
         cur = con.cursor()
         try:
             cur.execute("""
-                DELETE FROM product_test WHERE id=?
+                DELETE FROM product WHERE id=?
             """,(product_id,))
         except sqlite3.Error as e:
             print(e)

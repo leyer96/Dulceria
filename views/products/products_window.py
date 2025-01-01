@@ -65,6 +65,11 @@ class ProductsWindow(QWidget):
         grid.addWidget(self.table, 2, 0, 9, 9)
         grid.addLayout(buttons_layout, 11, 0, 1, 9)
         grid.addWidget(self.menu, 2, 9, 5, 3)
+
+        for i in range(12):
+            grid.setColumnStretch(i, 1)
+        for j in range(12):
+            grid.setRowStretch(j, 1)
         
         self.setLayout(grid)
 
@@ -96,7 +101,7 @@ class ProductsWindow(QWidget):
     
     def open_add_dialog(self):
         dlg = AddItemDialog(self.db, self.categories)
-        dlg.saved.connect(self.model.refresh_table)
+        dlg.connect(self.model.refresh_table)
         dlg.exec()
     
     def open_edit_dialog(self, row):
