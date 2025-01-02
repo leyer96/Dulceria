@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QTableView,
-    QGridLayout,
+    QVBoxLayout,
     QAbstractItemView,
     QHeaderView,
     QPushButton,
@@ -9,8 +9,8 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox
 )
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QScreen
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QIcon
 from views.home.search_widget import SearchWidget
 from models.stock_model import StockModel
 from models.batch_model import BatchModel
@@ -21,6 +21,8 @@ from views.dialogs.add_deal import AddDealDialog
 from utils import Paths, toggle_btns_state, load_settings
 
 class StockWindow(QWidget):
+    discount_added = Signal()
+    deal_added = Signal()
     def __init__(self, db, menu):
         super().__init__()
 
@@ -81,22 +83,32 @@ class StockWindow(QWidget):
         buttons_layout.addWidget(self.add_discount_btn)
         buttons_layout.addWidget(self.add_deal_btn)
 
-        grid = QGridLayout()
-        grid.addWidget(stock_title, 0, 0, 1, 12)
-        grid.addWidget(self.search_widget, 1, 0, 1, 9)
-        grid.addWidget(self.stock_table, 2, 0, 4, 9)
-        grid.addWidget(self.edit_stock_btn, 6, 0, 1, 2)
-        grid.addWidget(batch_title, 6, 4, 1, 2)
-        grid.addWidget(self.batch_table, 7, 0, 4, 9)
-        grid.addLayout(buttons_layout, 11, 0, 1, 9)
-        grid.addWidget(self.menu, 2, 9, 5, 3)
+        layout = QHBoxLayout()
 
-        for i in range(12):
-            grid.setColumnStretch(i, 1)
-        for j in range(12):
-            grid.setRowStretch(j, 1)
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(stock_title)
+        left_layout.addWidget(self.search_widget)
+        left_layout.addWidget(self.stock_table)
+        left_layout.addWidget(self.edit_stock_btn)
+        left_layout.addWidget(batch_title)
+        left_layout.addWidget(self.batch_table)
+        left_layout.addLayout(buttons_layout)
+
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.menu)
+        right_layout.insertSpacing(0, 200)
+        right_layout.setAlignment(self.menu, Qt.AlignTop)
+
+        layout.addLayout(left_layout)
+        layout.addLayout(right_layout)
+
+        layout.setStretch(0, 4)
+        layout.setStretch(1, 1)
         
-        self.setLayout(grid)
+        self.setLayout(layout)
+
+        self.stock_model.get_all_stock()
+        self.batch_model.get_all_batchs()
 
         self.load_settings()
         
@@ -159,8 +171,9 @@ class StockWindow(QWidget):
         if row != -1:
             batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
             dlg = AddDiscountDialog(batch_id)
-            dlg.saved.connect(self.stock_model.refresh_table)
-            dlg.saved.connect(self.batch_model.refresh_table)
+            # dlg.saved.connect(self.stock_model.refresh_table)
+            # dlg.saved.connect(self.batch_model.refresh_table)
+            dlg.saved.connect(self.discount_added.emit)
             dlg.saved.connect(lambda: QMessageBox.information(self, "Descuento Guardado", "Descuento guardado con éxito"))
             dlg.exec()
 
@@ -169,8 +182,9 @@ class StockWindow(QWidget):
         if row != -1:
             batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
             dlg = AddDealDialog(batch_id)
-            dlg.saved.connect(self.stock_model.refresh_table)
-            dlg.saved.connect(self.batch_model.refresh_table)
+            # dlg.saved.connect(self.stock_model.refresh_table)
+            # dlg.saved.connect(self.batch_model.refresh_table)
+            dlg.saved.connect(self.deal_added.emit)
             dlg.exec()
 
     def resolve_batch(self):

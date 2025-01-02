@@ -69,6 +69,7 @@ class SearchBox(QWidget):
             dlg.float_amount.connect(self.emit_item_data)
             dlg.int_amount.connect(self.emit_item_data)
             dlg.exec()
+            print(dlg.parent())
 
     def emit_item_data(self, amount):
         row = self.selected_row

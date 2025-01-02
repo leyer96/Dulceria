@@ -6,7 +6,9 @@ from PySide6.QtWidgets import (
     QPushButton,
     QWidget,
     QMessageBox,
-    QLabel
+    QLabel,
+    QVBoxLayout,
+    QHBoxLayout
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -66,22 +68,34 @@ class DealsWindow(QWidget):
         self.delete_deal_btn.clicked.connect(self.delete_deal)
         self.delete_discount_btn.clicked.connect(self.delete_discount)
 
-        grid = QGridLayout()
-        grid.addWidget(deals_title, 0, 0, 1, 12)
-        grid.addWidget(self.search_widget, 1, 0, 1, 9)
-        grid.addWidget(self.deal_table, 2, 0, 4, 9)
-        grid.addWidget(self.delete_deal_btn, 6, 0, 1, 2)
-        grid.addWidget(discounts_title, 6, 4, 1, 2)
-        grid.addWidget(self.discount_table, 7, 0, 4, 9)
-        grid.addWidget(self.delete_discount_btn, 11, 0, 1, 9)
-        grid.addWidget(self.menu, 2, 9, 5, 3)
         
-        for i in range(12):
-            grid.setColumnStretch(i, 1)
-        for j in range(12):
-            grid.setRowStretch(j, 1)
+        # LAYOUT
+        layout = QHBoxLayout()
+
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(deals_title)
+        left_layout.addWidget(self.search_widget)
+        left_layout.addWidget(self.deal_table)
+        left_layout.addWidget(self.delete_deal_btn)
+        left_layout.addWidget(discounts_title)
+        left_layout.addWidget(self.discount_table)
+        left_layout.addWidget(self.delete_discount_btn)
+
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.menu)
+        right_layout.insertSpacing(0, 200)
+        right_layout.setAlignment(self.menu, Qt.AlignTop)
+
+        layout.addLayout(left_layout)
+        layout.addLayout(right_layout)
+
+        layout.setStretch(0, 4)
+        layout.setStretch(1, 1)
         
-        self.setLayout(grid)
+        self.setLayout(layout)
+
+        self.deal_model.refresh_table()
+        self.discount_model.refresh_table()
 
         self.load_settings()
         

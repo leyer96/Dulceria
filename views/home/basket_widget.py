@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QCursor
 from models.basket_model import BasketModel
-from views.dialogs.set_amount import SetAmountDialog
+from views.dialogs.update_amount import UpdateAmountDialog
 from views.dialogs.register_payment import RegisterPaymentDialog
 from utils import save_payment, Paths, substract_from_stock, update_discount, update_deal
 
@@ -36,7 +36,7 @@ class BasketWidget(QWidget):
         self.amount_label = QLabel("$0")
 
         self.del_btn = QPushButton(QIcon(Paths.icon("shopping-basket--minus.png")),"Eliminar")
-        self.edit_btn = QPushButton(QIcon(Paths.icon("shopping-basket--pencil.png")),"Editar")
+        # self.edit_btn = QPushButton(QIcon(Paths.icon("shopping-basket--pencil.png")),"Editar")
         confirm_btn = QPushButton(QIcon(Paths.icon("credit-card--plus.png")),"Cobrar")
 
         # LAYOUT
@@ -45,7 +45,7 @@ class BasketWidget(QWidget):
 
         btns_layout = QHBoxLayout()
         btns_layout.addWidget(self.del_btn)
-        btns_layout.addWidget(self.edit_btn)
+        # btns_layout.addWidget(self.edit_btn)
         
         left_layout = QVBoxLayout()
         left_layout.addWidget(l1)
@@ -66,8 +66,11 @@ class BasketWidget(QWidget):
         right_container = QWidget()
         right_container.setLayout(right_layout)
     
-        layout.addWidget(left_container, stretch = 9)
-        layout.addWidget(right_container, stretch = 3)
+        layout.addWidget(left_container)
+        layout.addWidget(right_container)
+
+        layout.setStretch(0, 4)
+        layout.setStretch(1, 1)
 
         self.setLayout(layout)        
 
@@ -78,22 +81,22 @@ class BasketWidget(QWidget):
         self.model.layoutChanged.connect(self.table.clearSelection)
         self.model.deal_available.connect(lambda deal_str: QMessageBox.information(self, "Promoción Encotrada", f"Hay una promoción {deal_str} para este producto."))
         self.table.clicked.connect(self.on_clicked_row)
-        self.edit_btn.clicked.connect(self.select_amount)
+        # self.edit_btn.clicked.connect(self.select_amount)
         self.del_btn.clicked.connect(lambda: self.model.delete_item(self.selected_row))
         confirm_btn.clicked.connect(self.open_payment_dialog)
 
         # PROPS
         self.selected_row = None
-        self.edit_btn.setEnabled(False)
-        self.edit_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        # self.edit_btn.setEnabled(False)
+        # self.edit_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.del_btn.setEnabled(False)
         self.del_btn.setCursor(QCursor(Qt.PointingHandCursor))
         confirm_btn.setCursor(QCursor(Qt.PointingHandCursor))
         
     def on_clicked_row(self, index):
         self.selected_row = index.row()
-        if not self.edit_btn.isEnabled():
-            self.edit_btn.setEnabled(True)
+        if not self.del_btn.isEnabled():
+            # self.edit_btn.setEnabled(True)
             self.del_btn.setEnabled(True)
 
     def select_amount(self):
@@ -101,10 +104,11 @@ class BasketWidget(QWidget):
         if row != None:
             product = self.model._data[row][1]
             amount = self.model._data[row][4]
-            dlg = SetAmountDialog(product, amount, True)
+            dlg = UpdateAmountDialog(product, amount, True)
             dlg.int_amount.connect(lambda amount: self.update_amount(row, amount))
             dlg.float_amount.connect(lambda amount: self.update_amount(row, amount))
             dlg.exec()
+            print(dlg.parent())
 
     def update_amount(self, row, amount):
         self.model._data[row][4] = amount

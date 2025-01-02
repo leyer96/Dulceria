@@ -6,14 +6,13 @@ from PySide6.QtWidgets import (
     QComboBox,
     QLabel,
     QWidget,
-    QGridLayout,
     QSizePolicy,
     QMessageBox,
-    QFormLayout,
-    QLineEdit
+    QLineEdit,
+    QFormLayout
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QScreen
+from views.dialogs.authorize import AuthorizeDialog
 from utils import load_settings, save_settings
 
 class AdminWindow(QWidget):
@@ -110,6 +109,24 @@ class AdminWindow(QWidget):
         delete_category_layout.addWidget(self.select_category_input)
         delete_category_layout.addWidget(delete_category_btn)
 
+        # CHANGE PASSWORD
+
+        password_title = QLabel("Contraseña")
+        password_title.setStyleSheet("font-size: 20px; font-weight: bold")
+
+        self.new_password_input = QLineEdit()
+        self.new_password_input.setEchoMode(QLineEdit.Password)
+        self.new_password_input_repeat = QLineEdit()
+        self.new_password_input_repeat.setEchoMode(QLineEdit.Password)
+
+        reset_password_form = QFormLayout()
+        reset_password_form.addRow("Contraseña nueva:", self.new_password_input)
+        reset_password_form.addRow("Repetir contraseña:", self.new_password_input_repeat)
+
+        reset_password_btn = QPushButton("Cambiar Contraseña")
+        reset_password_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        
+        # HIDDEN CONTENT WIDGET
         hidden_layout = QVBoxLayout()
         hidden_layout.addWidget(permissions_title)
         hidden_layout.addLayout(options_layout)
@@ -119,15 +136,14 @@ class AdminWindow(QWidget):
         hidden_layout.addWidget(add_category_btn)
         hidden_layout.addLayout(delete_category_layout)
         hidden_layout.addWidget(delete_category_btn)
-
-        # TEST
-        test_btn = QPushButton("TEST")
-        test_btn.clicked.connect(lambda: print(f"AVAILABLE SPACE{QScreen.availableSize()}"))
-        hidden_layout.addWidget(test_btn)
+        hidden_layout.addWidget(password_title)
+        hidden_layout.addLayout(reset_password_form)
+        hidden_layout.addWidget(reset_password_btn)
 
         hidden_layout.setAlignment(save_permissions_btn, Qt.AlignHCenter)
         hidden_layout.setAlignment(add_category_btn, Qt.AlignHCenter)
         hidden_layout.setAlignment(delete_category_btn, Qt.AlignHCenter)
+        hidden_layout.setAlignment(reset_password_btn, Qt.AlignHCenter)
 
         self.hidden_widget = QWidget()
         self.hidden_widget.setLayout(hidden_layout)
@@ -137,35 +153,46 @@ class AdminWindow(QWidget):
         save_permissions_btn.clicked.connect(self.save_permissions)
         add_category_btn.clicked.connect(self.add_category)
         delete_category_btn.clicked.connect(self.delete_category)
+        reset_password_btn.clicked.connect(self.validate_passwords)
 
         # LOGIN
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
-        form = QFormLayout()
-        form.addRow("Contraseña:", self.password_input)
         login_btn = QPushButton("Ingresar")
+        login_btn.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
 
-        login_layout = QVBoxLayout()
-        login_layout.addLayout(form)
+        login_layout = QHBoxLayout()
+        login_layout.addWidget(QLabel("Contraseña: "))
+        login_layout.addWidget(self.password_input)
         login_layout.addWidget(login_btn)
+
+        login_layout.setAlignment(login_btn, Qt.AlignHCenter)
 
         self.login_widget = QWidget()
         self.login_widget.setLayout(login_layout)
 
         login_btn.clicked.connect(self.authenticate)
     
-        # GRID
-        grid = QGridLayout()
-        grid.addWidget(title_label, 0, 0, 1, 9)
-        grid.addWidget(self.hidden_widget, 1, 0, 4, 9)
-        grid.addWidget(self.login_widget, 1, 0, 2, 9)
-        grid.addWidget(self.menu, 2, 9, 5, 3)
-        self.setLayout(grid)
+        # LAYOUT
+        layout = QHBoxLayout()
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(title_label)
+        left_layout.addWidget(self.hidden_widget)
+        left_layout.addWidget(self.login_widget)
 
-        for i in range(12):
-            grid.setColumnStretch(i, 1)
-        for j in range(12):
-            grid.setRowStretch(j, 1)
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.menu)
+        right_layout.insertSpacing(0, 200)
+        right_layout.setAlignment(self.menu, Qt.AlignTop)
+        
+        layout.addLayout(left_layout)
+        layout.addLayout(right_layout)
+
+        layout.setAlignment(left_layout, Qt.AlignTop)
+        layout.setStretch(0, 4)
+        layout.setStretch(1, 1)
+
+        self.setLayout(layout)
 
         # CONFIG
         self.menu.go_to_admin_window_btn.setEnabled(False)
@@ -173,7 +200,7 @@ class AdminWindow(QWidget):
 
     def authenticate(self):
         password = self.password_input.text()
-        if password == "123":
+        if password == self.settings["admin"]["password"] or password == self.settings["developer"]["password"]:
             self.hidden_widget.show()
             self.login_widget.hide()
 
@@ -181,6 +208,26 @@ class AdminWindow(QWidget):
         self.hidden_widget.hide()
         self.login_widget.show()
         self.password_input.clear()
+
+    def validate_passwords(self):
+        password1 = self.new_password_input.text()
+        password2 = self.new_password_input_repeat.text()
+        if password1 == password2:
+            dlg = AuthorizeDialog()
+            dlg.authorized.connect(lambda: self.reset_password(password1))
+            dlg.exec()
+        else:
+            QMessageBox.information(self, "Contraseñas inválidas", "Las contraseñas no son iguales.")
+
+    def reset_password(self, password):
+        self.settings["admin"]["password"] = password
+        saved = save_settings(self.settings)
+        if saved:
+            QMessageBox.information(self, "Contraseña Guardada", "La contraseña se actualizó con éxito")
+            self.new_password_input.clear()
+            self.new_password_input_repeat.clear()
+        else:
+            QMessageBox.information(self, "Error", "Ha ocurrido un error. Contacte al administrador")
     
     def load_settings(self):
         settings = load_settings()
@@ -257,5 +304,3 @@ class AdminWindow(QWidget):
                     QMessageBox.information(self, "Error", "Ha ocurrido un error. Contacte al administrador")
         else:
             QMessageBox.warning(self, "Error", "Debe haber por lo menos una categoría guardada. ")
-        
-        

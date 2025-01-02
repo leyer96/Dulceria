@@ -11,10 +11,10 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal
 
-class SetAmountDialog(QDialog):
+class UpdateAmountDialog(QDialog):
     int_amount = Signal(int)
     float_amount = Signal(float)
-    def __init__(self, product):
+    def __init__(self, product, amount=1, update=False):
         super().__init__()
 
         text_label = QLabel("Ingrese la cantindad de {} a añadir.".format(product))
@@ -31,14 +31,25 @@ class SetAmountDialog(QDialog):
         self.int_amount_input = QSpinBox()
         self.int_amount_input.setSingleStep(1)
         self.int_amount_input.setRange(0,999)
-        self.int_amount_input.clear()
 
         self.float_amount_input = QDoubleSpinBox()
         self.float_amount_input.setSingleStep(1)
         self.float_amount_input.setRange(0,999)
-        self.float_amount_input.clear()
 
         self.float_amount_input.hide()
+
+        if update:
+            self.float_amount_option.hide()
+            self.int_amount_option.hide()
+            if type(amount) == float:
+                self.int_amount_input.hide()
+                self.float_amount_input.show()
+                self.float_amount_input.setValue(amount)
+                text_label.setText("Ingrese la cantindad de gr. de {} a añadir.".format(product))
+            else:
+                self.float_amount_input.hide()
+                self.int_amount_input.show()
+                self.int_amount_input.setValue(amount)
 
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
@@ -68,7 +79,7 @@ class SetAmountDialog(QDialog):
 
     def validate_input(self):
         if self.float_amount_option.isChecked():
-            if self.float_amount_input.value():
+            if self.float_amount_input.value() > 0:
                 self.emit_amount()
                 self.close()
             else:

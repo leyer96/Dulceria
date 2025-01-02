@@ -6,9 +6,10 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QAbstractItemView,
     QHeaderView,
-    QGridLayout,
+    QVBoxLayout,
     QFileDialog,
     QMessageBox,
+    QSpacerItem
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
@@ -19,7 +20,6 @@ from views.dialogs.select_export_data import SelectExportDataDialog
 from models.payment_model import PaymentModel
 from utils import (
     Paths, 
-    toggle_btns_state, 
     create_csv_file, 
     get_all_from_productpayment,
     get_prodcutpayment_from_payment_id,
@@ -38,7 +38,14 @@ class PaymentsWindow(QWidget):
             title = QLabel("Pagos")
             self.view_details_btn = QPushButton(QIcon(Paths.icon("application-detail.png")),"Ver Detalles")
             self.export_data_btn = QPushButton(QIcon(Paths.icon("document-excel-csv.png")),"Exportar Datos")
+            self.cash_amount_label = QLabel()
+            self.card_amount_label = QLabel()
 
+            self.spacer = QWidget()
+
+            btns_layout = QHBoxLayout()
+            btns_layout.addWidget(self.view_details_btn)
+            btns_layout.addWidget(self.export_data_btn)
             # CONFIG
             self.table.setModel(self.model)
             self.selected_row = -1
@@ -53,28 +60,48 @@ class PaymentsWindow(QWidget):
             self.search_widget.data.connect(lambda date_data: self.model.search(date_data))
             self.view_details_btn.clicked.connect(self.open_payment_details_dialog)
             self.export_data_btn.clicked.connect(self.open_select_export_data_dialog)
+            self.model.success.connect(self.calculate_amount)
             self.model.success.connect(lambda: self.view_details_btn.setEnabled(False))
             self.model.error.connect(lambda: self.view_details_btn.setEnabled(False))
 
             self.filler = QWidget()
 
             # LAYOUT
-            buttons_layout = QHBoxLayout()
-            buttons_layout.addWidget(self.view_details_btn)
-            buttons_layout.addWidget(self.export_data_btn) 
-            grid = QGridLayout()
-            grid.addWidget(title, 0, 0, 1, 9)
-            grid.addWidget(self.search_widget, 1, 0, 1, 9)
-            grid.addWidget(self.table, 2, 0, 9, 9)
-            grid.addWidget(self.menu, 2, 9, 5, 3)
-            grid.addLayout(buttons_layout, 11, 0, 1, 9)
-            grid.addWidget(self.filler, 1, 0, 11, 5)
-            for i in range(12):
-                  grid.setColumnStretch(i, 1)
-            for j in range(12):
-                  grid.setRowStretch(j, 1)
-                  
-            self.setLayout(grid)
+            self.cash_label = QLabel("Efectivo: ")
+            self.card_label = QLabel("Tarjeta: ")
+
+            cash_amount_layout = QHBoxLayout()
+            cash_amount_layout.addWidget(self.cash_label)
+            cash_amount_layout.addWidget(self.cash_amount_label)
+            card_amount_layout = QHBoxLayout()
+            card_amount_layout.addWidget(self.card_label)
+            card_amount_layout.addWidget(self.card_amount_label)
+
+            layout = QHBoxLayout()
+
+            left_layout = QVBoxLayout()
+            left_layout.addWidget(title)
+            left_layout.addWidget(self.search_widget)
+            left_layout.addWidget(self.table)
+            left_layout.addLayout(btns_layout)
+            left_layout.addWidget(self.spacer)
+
+            right_layout = QVBoxLayout()
+            right_layout.addWidget(self.menu)
+            right_layout.addLayout(cash_amount_layout)
+            right_layout.addLayout(card_amount_layout)
+            right_layout.insertSpacing(0, 200)
+            right_layout.setAlignment(self.menu, Qt.AlignTop)
+
+            layout.addLayout(left_layout)
+            layout.addLayout(right_layout)
+
+            layout.setStretch(0, 4)
+            layout.setStretch(1, 1)
+            
+            self.setLayout(layout)
+
+            self.model.get_todays_payment()
 
             self.load_settings()
 
@@ -149,7 +176,7 @@ class PaymentsWindow(QWidget):
                         headers = ["ID_PAGO", "FECHA", "HORA", "PRODUCTO", "PRECIO UNITARIO", "CANTIDAD", "FORMAD DE PAGO"]
                         create_csv_file(formated_data, headers, dirname, fn)
             else:
-                  dlg = QMessageBox.information(self, "Estatus", "No hay datos que exportar con los parámetros seleccionados.")
+                  QMessageBox.information(self, "Estatus", "No hay datos que exportar con los parámetros seleccionados.")
       
       def load_settings(self):
             settings = load_settings()
@@ -158,12 +185,38 @@ class PaymentsWindow(QWidget):
                   self.table.hide()
                   self.view_details_btn.hide()
                   self.export_data_btn.hide()
+                  self.export_data_btn.hide()
+                  self.export_data_btn.hide()
+                  self.cash_label.hide()
+                  self.card_label.hide()
+                  self.cash_amount_label.hide()
+                  self.card_amount_label.hide()
+                  self.spacer.show()
             else:
                   self.filler.hide()
                   self.search_widget.show()
                   self.table.show()
                   self.view_details_btn.show()
                   self.export_data_btn.show()
+                  self.card_label.show()
+                  self.cash_label.show()
+                  self.card_amount_label.show()
+                  self.cash_amount_label.show()
+                  self.spacer.hide()
+
+      def calculate_amount(self):
+            rows = self.model.rowCount()
+            cash = 0
+            card = 0
+            for i in range(0, rows):
+                  type = self.model.data(self.model.index(i, 2), Qt.DisplayRole)
+                  amount = float(self.model.data(self.model.index(i, 3), Qt.DisplayRole)[1:])
+                  if type == "Efectivo":
+                        cash += amount
+                  else:
+                        card += amount
+            self.cash_amount_label.setText(f"${str(cash)}")
+            self.card_amount_label.setText(f"${str(card)}")
               
 
                   

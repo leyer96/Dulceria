@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QTableView,
-    QGridLayout,
+    QVBoxLayout,
     QAbstractItemView,
     QHeaderView,
     QPushButton,
@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QLabel
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon
 from views.home.search_widget import SearchWidget
 from models.search_product_model import SearchModel
@@ -18,6 +18,8 @@ from views.dialogs.edit_product import EditItemDialog
 from utils import Paths, load_settings
 
 class ProductsWindow(QWidget):
+    product_created = Signal()
+    product_edited = Signal()
     def __init__(self, db, menu):
         super().__init__()
 
@@ -59,19 +61,26 @@ class ProductsWindow(QWidget):
         buttons_layout.addWidget(self.edit_product_btn)
         buttons_layout.addWidget(self.delete_product_btn)
 
-        grid = QGridLayout()
-        grid.addWidget(title, 0, 0, 1, 12)
-        grid.addWidget(self.search_widget, 1, 0, 1, 9)
-        grid.addWidget(self.table, 2, 0, 9, 9)
-        grid.addLayout(buttons_layout, 11, 0, 1, 9)
-        grid.addWidget(self.menu, 2, 9, 5, 3)
+        layout = QHBoxLayout()
 
-        for i in range(12):
-            grid.setColumnStretch(i, 1)
-        for j in range(12):
-            grid.setRowStretch(j, 1)
-        
-        self.setLayout(grid)
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(title)
+        left_layout.addWidget(self.search_widget)
+        left_layout.addWidget(self.table)
+        left_layout.addLayout(buttons_layout)
+
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.menu)
+        right_layout.insertSpacing(0, 200)
+        right_layout.setAlignment(self.menu, Qt.AlignTop)
+
+        layout.addLayout(left_layout)
+        layout.addLayout(right_layout)
+
+        layout.setStretch(0, 4)
+        layout.setStretch(1, 1)
+
+        self.setLayout(layout)
 
         self.load_settings()
         
@@ -101,7 +110,8 @@ class ProductsWindow(QWidget):
     
     def open_add_dialog(self):
         dlg = AddItemDialog(self.db, self.categories)
-        dlg.connect(self.model.refresh_table)
+        dlg.saved.connect(self.model.refresh_table)
+        dlg.saved.connect(self.product_created.emit)
         dlg.exec()
     
     def open_edit_dialog(self, row):
@@ -109,6 +119,7 @@ class ProductsWindow(QWidget):
             product_id = self.model.data(self.model.index(row, 0), Qt.DisplayRole)
             dlg = EditItemDialog(self.db, product_id, self.categories)
             dlg.item_edited.connect(self.model.refresh_table)
+            dlg.item_edited.connect(self.product_edited.emit)
             dlg.exec()
         
     def delete_product(self, row):

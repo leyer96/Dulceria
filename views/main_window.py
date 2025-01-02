@@ -42,14 +42,31 @@ class MainWindow(QMainWindow):
                     if isinstance(wj, DealsWindow):
                         wi.checkout.payment_saved.connect(wj.deal_model.refresh_table)
                         wi.checkout.payment_saved.connect(wj.discount_model.refresh_table)
-                if isinstance(wi, StockWindow):
-                    wj.menu.go_to_stock.connect(wi.stock_model.get_all_stock)
-                    wj.menu.go_to_stock.connect(wi.batch_model.get_all_batchs)
-                if isinstance(wi, PaymentsWindow):
-                    wj.menu.go_to_payments.connect(wi.to_default)
-                if isinstance(wi, AdminWindow):
+                    if isinstance(wj, PaymentsWindow):
+                        wi.checkout.payment_saved.connect(wj.model.get_todays_payment)
+                    if isinstance(wj, StockWindow):
+                        wi.checkout.payment_saved.connect(wj.stock_model.refresh_table)
+                elif isinstance(wi, StockWindow):
+                    if isinstance(wj, DealsWindow):
+                        wi.discount_added.connect(wj.discount_model.refresh_table)
+                        wi.deal_added.connect(wj.deal_model.refresh_table)
+                    # wj.menu.go_to_stock.connect(wi.stock_model.get_all_stock)
+                    # wj.menu.go_to_stock.connect(wi.batch_model.get_all_batchs)
+                elif isinstance(wi, AdminWindow):
                     wi.new_settings.connect(wj.load_settings)
                     wj.menu.go_to_admin.connect(wi.hide_content)
+                elif isinstance(wi, ProductsWindow):
+                    if isinstance(wj, StockWindow):
+                        wi.model.product_deleted.connect(wj.stock_model.refresh_table)
+                        wi.model.product_deleted.connect(wj.batch_model.refresh_table)
+                        wi.product_created.connect(wj.stock_model.refresh_table)
+                        wi.product_edited.connect(wj.stock_model.refresh_table)
+                        wi.product_edited.connect(wj.batch_model.refresh_table)
+                    elif isinstance(wj, DealsWindow):
+                        wi.model.product_deleted.connect(wj.deal_model.refresh_table)
+                        wi.model.product_deleted.connect(wj.discount_model.refresh_table)
+                        wi.product_edited.connect(wj.discount_model.refresh_table)
+                        wi.product_edited.connect(wj.deal_model.refresh_table)
 
         container.setLayout(container_layout)
         

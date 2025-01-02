@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import (
-    QCheckBox,
-    QGridLayout,
-    QPushButton,
     QWidget,
+    QVBoxLayout,
+    QHBoxLayout
 )
+from PySide6.QtCore import Qt
 from views.home.search_widget import SearchWidget
 from views.home.products_table import SearchBox
 from views.home.basket_widget import BasketWidget
@@ -29,12 +29,29 @@ class HomeWindow(QWidget):
         self.menu.go_to_home_btn.setEnabled(False)
         
         # LAYOUT
-        grid = QGridLayout()
-        grid.addWidget(self.search_widget, 0, 0, 2, 9)
-        grid.addWidget(self.search_box, 2, 0, 5, 9)
-        grid.addWidget(self.checkout, 7, 0, 5, 12)
-        grid.addWidget(self.menu, 2, 9, 5, 3)
-        self.setLayout(grid)
+        layout = QVBoxLayout()
+
+        sublayout = QHBoxLayout()
+        sublayout_left = QVBoxLayout()
+        sublayout_left.addWidget(self.search_widget)
+        sublayout_left.addWidget(self.search_box)
+        sublayout.addLayout(sublayout_left)
+        
+        sublayout_right = QVBoxLayout()
+        sublayout_right.addWidget(self.menu)
+        sublayout_right.insertSpacing(0, 200)
+        sublayout_right.setAlignment(self.menu, Qt.AlignTop)
+
+        sublayout.addLayout(sublayout_left)
+        sublayout.addLayout(sublayout_right)
+
+        sublayout.setStretch(0, 4)
+        sublayout.setStretch(1, 1)
+
+        layout.addLayout(sublayout)
+        layout.addWidget(self.checkout)
+
+        self.setLayout(layout)
         
     def handle_search(self):
         str = self.search_widget.search_input.text()

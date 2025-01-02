@@ -187,7 +187,6 @@ class BasketModel(QAbstractTableModel):
     
     def delete_item(self, row):
         if row != None:
-            # MOVE METHOD TO MODEL ???
             del(self._data[row])
             self.calculate_total()
             self.layoutChanged.emit()

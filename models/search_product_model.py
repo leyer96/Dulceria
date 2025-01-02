@@ -6,6 +6,7 @@ from utils import Paths
 class SearchModel(QSqlQueryModel):
     error = Signal()
     success = Signal()
+    product_deleted = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -61,7 +62,8 @@ class SearchModel(QSqlQueryModel):
             self.success.emit()
 
     def delete_product(self, product_id):
-        con = sqlite3.connect(Paths.db())
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         try:
             cur.execute("""
@@ -73,6 +75,7 @@ class SearchModel(QSqlQueryModel):
         else:
             con.commit()
             self.success.emit()
+            self.product_deleted.emit()
             self.refresh_table()
 
     def headerData(self, section, orientation, role):

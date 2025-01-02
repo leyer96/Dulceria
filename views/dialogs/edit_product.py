@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 from PySide6.QtCore import Signal
-from PySide6.QtSql import QSqlQuery
 from utils import Paths
 import sqlite3
 

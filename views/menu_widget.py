@@ -34,6 +34,24 @@ class Menu(QWidget):
         self.go_to_deals_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.go_to_admin_window_btn.setCursor(QCursor(Qt.PointingHandCursor))
 
+        layout = QVBoxLayout()
+        layout.addWidget(self.go_to_home_btn)
+        layout.addWidget(self.go_to_products_btn)
+        layout.addWidget(self.go_to_payments_btn)
+        layout.addWidget(self.go_to_stock_btn)
+        layout.addWidget(self.go_to_deals_btn)
+        layout.addWidget(self.go_to_admin_window_btn)
+
+        layout.setAlignment(self.go_to_home_btn, Qt.AlignHCenter)
+        layout.setAlignment(self.go_to_products_btn, Qt.AlignHCenter)
+        layout.setAlignment(self.go_to_stock_btn, Qt.AlignHCenter)
+        layout.setAlignment(self.go_to_payments_btn, Qt.AlignHCenter)
+        layout.setAlignment(self.go_to_deals_btn, Qt.AlignHCenter)
+        layout.setAlignment(self.go_to_admin_window_btn, Qt.AlignHCenter)
+
+        layout.setSpacing(1)
+
+        self.setLayout(layout)
 
         btn_size = QSize(120, 40)
 
@@ -45,23 +63,4 @@ class Menu(QWidget):
         self.go_to_deals_btn.setFixedSize(btn_size)
         self.go_to_admin_window_btn.setFixedSize(btn_size)
 
-        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Maximum)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.go_to_home_btn)
-        layout.addWidget(self.go_to_products_btn)
-        layout.addWidget(self.go_to_payments_btn)
-        layout.addWidget(self.go_to_stock_btn)
-        layout.addWidget(self.go_to_deals_btn)
-        layout.addWidget(self.go_to_admin_window_btn)
-
-        layout.setSpacing(1)
-
-        layout.setAlignment(self.go_to_home_btn, Qt.AlignHCenter)
-        layout.setAlignment(self.go_to_products_btn, Qt.AlignHCenter)
-        layout.setAlignment(self.go_to_stock_btn, Qt.AlignHCenter)
-        layout.setAlignment(self.go_to_payments_btn, Qt.AlignHCenter)
-        layout.setAlignment(self.go_to_deals_btn, Qt.AlignHCenter)
-        layout.setAlignment(self.go_to_admin_window_btn, Qt.AlignHCenter)
-
-        self.setLayout(layout)
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)

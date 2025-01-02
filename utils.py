@@ -401,7 +401,7 @@ def substract_from_stock(products, deals_0, deals_1):
                         times = cur.execute("SELECT amount FROM deal WHERE product_id = ?", (product_id,)).fetchone()[0]
                         amount = amount * times
             if prev_amount > 0:
-                new_amount = int(prev_amount - amount)
+                new_amount = max(0, int(prev_amount - amount))
                 cur.execute("UPDATE stock SET amount = ? WHERE stock.product_id = ?", (new_amount, product_id))
             else:
                 print("ERROR DE EMPAREJAMIENTO CON STOCK REAL")
@@ -448,10 +448,12 @@ def update_deal(products, deals):
     try:
         for product in products:
             product_id = product[0]
-            name = product[1]
+            name = product[1].lower()
             if product_id in deals:
                 og_name = cur.execute("SELECT name FROM product WHERE id = ?", (product_id,)).fetchone()[0]
+                print(f"OG NAME: {og_name} AND BOUGHT: {name}")
                 if name != og_name:
+                    print(f"UPDATING FOR {name}")
                     redeems = product[4]
                     available_redeems = cur.execute("SELECT redeems FROM deal WHERE product_id = ?", (product_id,)).fetchone()[0]
                     new_available_redeems = available_redeems - redeems
