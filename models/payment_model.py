@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 class PaymentModel(QSqlQueryModel):
     error = Signal()
     success = Signal()
+    no_record = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -49,6 +50,8 @@ class PaymentModel(QSqlQueryModel):
             print(e)
             self.error.emit()
         else:
+            if not Qquery.first():
+                self.no_record.emit()
             self.success.emit()
                
     def get_todays_payment(self):

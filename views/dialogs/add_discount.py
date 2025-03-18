@@ -59,6 +59,7 @@ class AddDiscountDialog(QDialog):
 
         self.duration_input = QSpinBox()
         self.duration_input.setRange(1, 30)
+        self.duration_input.setValue(5)
 
         duration_layout = QHBoxLayout()
         duration_layout.addWidget(QLabel("Duración (días)"))
@@ -72,7 +73,13 @@ class AddDiscountDialog(QDialog):
         redeems_layout.addWidget(self.redeems_input)
 
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
+        save_btn = button_box.button(QDialogButtonBox.Save)
+        save_btn.setText("Guardar")
 
         layout = QVBoxLayout()
         layout.addWidget(self.product_info_label)
@@ -145,6 +152,7 @@ class AddDiscountDialog(QDialog):
                     QMessageBox.critical(self, "Error", "Ha ocurrido un error. Comuníquese con el administrador.")
                 else:
                     con.commit()
+                    self.saved.emit()
                     self.close()
             else:
                 QMessageBox.information(self, "Datos inválidos", "Ingrese un monto válido.")

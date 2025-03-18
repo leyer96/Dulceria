@@ -14,14 +14,12 @@ from PySide6.QtCore import Signal
 class SetAmountDialog(QDialog):
     int_amount = Signal(int)
     float_amount = Signal(float)
-    def __init__(self, product):
+    def __init__(self, product_data):
         super().__init__()
 
-        text_label = QLabel("Ingrese la cantindad de {} a añadir.".format(product))
+        text_label = QLabel("Ingrese la cantindad de {} a añadir.".format(product_data["product"]))
 
         self.int_amount_option = QRadioButton("Unidades")
-        self.int_amount_option.setChecked(True)
-
         self.float_amount_option = QRadioButton("Gramos")
 
         self.options_layout = QHBoxLayout()
@@ -42,6 +40,9 @@ class SetAmountDialog(QDialog):
 
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
         layout = QVBoxLayout()
         layout.addWidget(text_label)
         layout.addWidget(self.int_amount_input)
@@ -50,6 +51,14 @@ class SetAmountDialog(QDialog):
         layout.addWidget(button_box)
 
         self.setLayout(layout)
+
+        if product_data["category"] == "Granel":
+            self.float_amount_option.setChecked(True)
+            self.toggle_inputs()
+            self.int_amount_option.setEnabled(False)
+        else:
+            self.int_amount_option.setChecked(True)
+            self.float_amount_option.setEnabled(False)
 
         self.int_amount_option.toggled.connect(self.toggle_inputs)
         

@@ -124,6 +124,7 @@ class BasketModel(QAbstractTableModel):
             basket_item[3] = discount_data["discount_price"]
             basket_items.append(basket_item)
             if product_id not in self.discounts:
+                print("ID ADDED TO DISCOUNTS")
                 self.discounts.append(product_id)
         # DEAL
         elif deal_data:
@@ -181,7 +182,8 @@ class BasketModel(QAbstractTableModel):
     def reset_basket(self):
         self._data = []
         self.discounts = []
-        self.deals = []
+        self.deals_0 = []
+        self.deals_1 = []
         self.total_calculated.emit(0)
         self.success.emit()
     

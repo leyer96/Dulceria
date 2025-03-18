@@ -5,13 +5,14 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
     QWidget,
-    QHeaderView
+    QHeaderView,
+    QMessageBox
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QCursor
 from utils import Paths
 from views.dialogs.set_amount import SetAmountDialog
-from views.dialogs.edit_product import EditItemDialog
+# from views.dialogs.edit_product import EditItemDialog
 from models.search_product_model import SearchModel
 
 class SearchBox(QWidget):
@@ -49,6 +50,7 @@ class SearchBox(QWidget):
         self.add_btn.clicked.connect(self.select_amount)
         self.model.success.connect(self.add_btn.setEnabled(False))
         self.model.error.connect(self.add_btn.setEnabled(False))
+        self.model.no_record.connect(lambda: QMessageBox.information(self, "Sin Emparejamiento", "No se encontró producto con la información proporcionada."))
 
         # PROPS
         self.selected_row = None
@@ -65,7 +67,12 @@ class SearchBox(QWidget):
         row = self.selected_row
         if row != None:
             product = self.model.data(self.model.index(row, 1), Qt.DisplayRole)
-            dlg = SetAmountDialog(product)
+            category = self.model.data(self.model.index(row, 4), Qt.DisplayRole)
+            product_data = {
+                "product": product,
+                "category": category
+            }
+            dlg = SetAmountDialog(product_data)
             dlg.float_amount.connect(self.emit_item_data)
             dlg.int_amount.connect(self.emit_item_data)
             dlg.exec()

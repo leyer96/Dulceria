@@ -58,7 +58,13 @@ class AddDealDialog(QDialog):
         self.redeems_input.setRange(1,100)
         self.redeems_input.setSingleStep(1)
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
+        save_btn = button_box.button(QDialogButtonBox.Save)
+        save_btn.setText("Guardar")
 
         # SIGNALS
         button_box.accepted.connect(self.handle_accept)
@@ -88,9 +94,9 @@ class AddDealDialog(QDialog):
         layout = QVBoxLayout()
         layout.addWidget(self.product_info_label)
         layout.addWidget(subtitle1)
-        layout.addWidget(QLabel("Cantidad x Cantidad (3 x 2)"))
+        layout.addWidget(QLabel("Cantidad x Cantidad (ejemplo 3 x 2)"))
         layout.addLayout(amountxamount_layout)
-        layout.addWidget(QLabel("Cantidad x Precio (2 x $20)"))
+        layout.addWidget(QLabel("Cantidad x Precio (ejemplo 2 x $20)"))
         layout.addLayout(amountxprice_layout)
         layout.addWidget(subtitle2)
         layout.addLayout(duration_layout)

@@ -2,6 +2,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QCheckBox,
+    QFileDialog,
     QPushButton,
     QComboBox,
     QLabel,
@@ -13,7 +14,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Signal
 from views.dialogs.authorize import AuthorizeDialog
-from utils import load_settings, save_settings
+from utils import load_settings, save_settings, Paths
+import os
+import shutil
 
 class AdminWindow(QWidget):
     new_settings = Signal()
@@ -109,6 +112,11 @@ class AdminWindow(QWidget):
         delete_category_layout.addWidget(self.select_category_input)
         delete_category_layout.addWidget(delete_category_btn)
 
+        # EXPORT DB
+        export_db_title = QLabel("Datos")
+        export_db_title.setStyleSheet("font-size: 20px; font-weight: bold")
+        export_db_btn = QPushButton("Exportar Datos")
+        
         # CHANGE PASSWORD
 
         password_title = QLabel("Contraseña")
@@ -136,6 +144,8 @@ class AdminWindow(QWidget):
         hidden_layout.addWidget(add_category_btn)
         hidden_layout.addLayout(delete_category_layout)
         hidden_layout.addWidget(delete_category_btn)
+        hidden_layout.addWidget(export_db_title)
+        hidden_layout.addWidget(export_db_btn)
         hidden_layout.addWidget(password_title)
         hidden_layout.addLayout(reset_password_form)
         hidden_layout.addWidget(reset_password_btn)
@@ -154,6 +164,7 @@ class AdminWindow(QWidget):
         add_category_btn.clicked.connect(self.add_category)
         delete_category_btn.clicked.connect(self.delete_category)
         reset_password_btn.clicked.connect(self.validate_passwords)
+        export_db_btn.clicked.connect(self.authorize_export)
 
         # LOGIN
         self.password_input = QLineEdit()
@@ -232,6 +243,10 @@ class AdminWindow(QWidget):
     def load_settings(self):
         settings = load_settings()
         self.settings = settings
+        if not settings["permissions"]["payments_window"]["view"]:
+            self.menu.go_to_payments_btn.hide()
+        else:
+            self.menu.go_to_payments_btn.show()
         if settings["permissions"]["products_window"]["add"]:
             self.product_add_option.setChecked(True)
         if settings["permissions"]["products_window"]["edit"]:
@@ -272,6 +287,10 @@ class AdminWindow(QWidget):
         if saved:
             QMessageBox.information(self, "Permisos Guardados", "Los permisos han sido guardados con éxito")
             self.new_settings.emit()
+            if self.settings["permissions"]["payments_window"]["view"]:
+                self.menu.go_to_payments_btn.show()
+            else:
+                self.menu.go_to_payments_btn.hide()
         else:
             QMessageBox.information(self, "Error", "Ha ocurrido un error. Contacte al administrador")
 
@@ -288,9 +307,15 @@ class AdminWindow(QWidget):
                     self.new_settings.emit()
                 else:
                     QMessageBox.information(self, "Error", "Ha ocurrido un error. Contacte al administrador")
-
+            else:
+                QMessageBox.information(self, "Categoría Duplicada", "Esta categoría ya existe.")
+    
     def delete_category(self):
         if len(self.settings["gui"]["product_categories"]) > 2:
+            text = self.select_category_input.currentText()
+            if text == "Granel":
+                QMessageBox.information(self, "Categoría Esencial", "Esta categoría no puede ser eliminada")
+                return
             index = self.select_category_input.currentIndex()
             if index != 0:
                 del(self.settings["gui"]["product_categories"][index])
@@ -304,3 +329,25 @@ class AdminWindow(QWidget):
                     QMessageBox.information(self, "Error", "Ha ocurrido un error. Contacte al administrador")
         else:
             QMessageBox.warning(self, "Error", "Debe haber por lo menos una categoría guardada. ")
+    
+    def authorize_export(self):
+        dlg = AuthorizeDialog()
+        dlg.authorized.connect(self.export_app_data)
+        dlg.exec()
+    
+    def export_app_data(self):
+        dirname = QFileDialog.getExistingDirectory(self, "Seleccionar Folder")
+        if dirname:
+            try:
+                db_datafile = Paths.test("db.db")
+                settings_datafile = Paths.setting("settings.json")
+
+                os.makedirs(dirname, exist_ok=True)
+
+                db_destination_file = os.path.join(dirname, "db.db")
+                settings_destination_file = os.path.join(dirname, "settings.json")
+
+                shutil.copy(db_datafile, db_destination_file)
+                shutil.copy(settings_datafile, settings_destination_file)
+            except Exception as e:
+                print(e)

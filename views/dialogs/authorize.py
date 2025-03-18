@@ -22,6 +22,9 @@ class AuthorizeDialog(QDialog):
 
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
         button_box.rejected.connect(self.close)
         button_box.accepted.connect(self.authorize)
         

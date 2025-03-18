@@ -77,7 +77,7 @@ class BasketWidget(QWidget):
         # SIGNALS
         self.model.total_calculated.connect(lambda total: self.amount_label.setText("${}".format(total)))
         self.model.layoutChanged.connect(lambda: self.del_btn.setEnabled(False))
-        self.model.layoutChanged.connect(lambda: self.edit_btn.setEnabled(False))
+        # self.model.layoutChanged.connect(lambda: self.edit_btn.setEnabled(False))
         self.model.layoutChanged.connect(self.table.clearSelection)
         self.model.deal_available.connect(lambda deal_str: QMessageBox.information(self, "Promoción Encotrada", f"Hay una promoción {deal_str} para este producto."))
         self.table.clicked.connect(self.on_clicked_row)
@@ -108,7 +108,6 @@ class BasketWidget(QWidget):
             dlg.int_amount.connect(lambda amount: self.update_amount(row, amount))
             dlg.float_amount.connect(lambda amount: self.update_amount(row, amount))
             dlg.exec()
-            print(dlg.parent())
 
     def update_amount(self, row, amount):
         self.model._data[row][4] = amount
@@ -118,11 +117,11 @@ class BasketWidget(QWidget):
     def open_payment_dialog(self):
         if len(self.model._data) > 0:
             amount = self.model.total
-            discounts_index = [list(discount.keys())[0] for discount in self.model.discounts]
+            discounts = self.model.discounts
             productsamount = []
             for row in self.model._data:
-                index = self.model._data.index(row)
-                if index in discounts_index:
+                id = row[0]
+                if id in discounts:
                     full_product_name = row[2] + " " + row[1] + " (DESCUENTO)"
                     full_product_name.strip()
                 else:
@@ -142,10 +141,8 @@ class BasketWidget(QWidget):
         discounts = self.model.discounts
         deals_0 = self.model.deals_0
         deals_1 = self.model.deals_1
-        print(f"IDS IN DEALS 0: {deals_0}")
-        print(f"IDS IN DEALS 1: {deals_1}")
         successful_payment = save_payment(payment_data, products)
-        successful_stock_update = substract_from_stock(products, deals_0, deals_1)
+        couldnt_update = substract_from_stock(products, deals_0, deals_1)
         succesful_discount_update = update_discount(products, discounts)
         succesful_deal_update = update_deal(products, deals_0 + deals_1)
         messages = []
@@ -155,10 +152,13 @@ class BasketWidget(QWidget):
             self.table.clearSelection()
             self.payment_saved.emit()
             messages.append("Pago registrado correctamente.")
-            if successful_stock_update:
+            if not couldnt_update:
                 messages.append("Inventario actualizado exitosamente.")
             else:
-                messages.append("Error al actualizar inventario.")
+                if isinstance(couldnt_update, list):
+                    messages.append("Revisar inventario de: \n {}".format("\n".join(couldnt_update)))
+                else:
+                    messages.append("Error al actualizar inventario.")
             if discounts:
                 if succesful_discount_update:
                     messages.append("Canje de descuento actualizado exitosamente.")
@@ -170,5 +170,6 @@ class BasketWidget(QWidget):
                 else:
                     messages.append("Error al actualizar canjes de promoción.")
             QMessageBox.information(self,"Pago exitoso","\n".join(messages))
+            self.model
         else:
             QMessageBox.critical(self, "Registro fallido", "Ha ocurrido un error. Contacte al administrador.")

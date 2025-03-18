@@ -7,6 +7,7 @@ class SearchModel(QSqlQueryModel):
     error = Signal()
     success = Signal()
     product_deleted = Signal()
+    no_record = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -21,7 +22,7 @@ class SearchModel(QSqlQueryModel):
                 return capitalized_value
             return value
     
-    def search(self, search_str, filter):
+    def search(self, search_str, filter, show_msg=True):
         self.search_str = search_str
         self.filter = filter
         query = """
@@ -35,7 +36,11 @@ class SearchModel(QSqlQueryModel):
         if not Qquery.exec():
             self.error.emit()
         else:
-            self.setQuery(Qquery)
+            if not Qquery.first():
+                if show_msg:
+                    self.no_record.emit()
+            else:
+                self.setQuery(Qquery)
             self.success.emit()
 
     def get_all_prodcuts(self):
@@ -50,7 +55,7 @@ class SearchModel(QSqlQueryModel):
 
     def refresh_table(self):
         if self.filter:
-            self.search(self.search_str, self.filter)
+            self.search(self.search_str, self.filter, show_msg=False)
         else:
             query = """
             SELECT * FROM product

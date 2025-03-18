@@ -15,6 +15,7 @@ from views.home.search_widget import SearchWidget
 from models.search_product_model import SearchModel
 from views.dialogs.add_product import AddItemDialog
 from views.dialogs.edit_product import EditItemDialog
+from views.dialogs.question import QuestionDialog
 from utils import Paths, load_settings
 
 class ProductsWindow(QWidget):
@@ -54,6 +55,7 @@ class ProductsWindow(QWidget):
         self.delete_product_btn.clicked.connect(lambda: self.delete_product(self.selected_row))
         self.model.success.connect(lambda: self.edit_product_btn.setEnabled(False))
         self.model.success.connect(lambda: self.delete_product_btn.setEnabled(False))
+        self.model.no_record.connect(lambda: QMessageBox.information(self, "Sin Emparejamiento", "No se encontró producto con la información proporcionada."))
         
         # LAYOUT
         buttons_layout = QHBoxLayout()
@@ -124,13 +126,18 @@ class ProductsWindow(QWidget):
         
     def delete_product(self, row):
         if row != None:
-            selection = QMessageBox.question(self, "Confirmar", "Estás seguro que quieres eliminar este producto?")
-            if selection == QMessageBox.StandardButton.Yes:
-                product_id = int(self.model.data(self.model.index(row, 0), Qt.DisplayRole))
-                self.model.delete_product(product_id)
+            question_dlg = QuestionDialog(f"¿Estás seguro que quieres eliminar: {self.model.data(self.model.index(row, 1), Qt.DisplayRole)}?")
+            product_id = int(self.model.data(self.model.index(row, 0), Qt.DisplayRole))
+            question_dlg.accepted.connect(lambda: self.model.delete_product(product_id))
+            question_dlg.accepted.connect(self.model.refresh_table)
+            question_dlg.exec()
 
     def load_settings(self):
         settings = load_settings()
+        if not settings["permissions"]["payments_window"]["view"]:
+            self.menu.go_to_payments_btn.hide()
+        else:
+            self.menu.go_to_payments_btn.show()
         if not settings["permissions"]["products_window"]["add"]:
             self.add_product_btn.hide()
         else:

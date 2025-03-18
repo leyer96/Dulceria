@@ -32,10 +32,18 @@ class SelectExportDataDialog(QDialog):
 
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
 
+        cancel_btn = self.button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
+        save_btn = self.button_box.button(QDialogButtonBox.Ok)
+        save_btn.setText("Exportar")
+
         # CONFIG
         if not is_query:
             self.current_query_option.setEnabled(False)
-        self.current_query_option.setChecked(True)
+            self.month_option.setChecked(True)
+        else:
+            self.current_query_option.setChecked(True)
         self.msg_label.hide()
         self.msg_label.setStyleSheet("color: red;")
         

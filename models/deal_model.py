@@ -8,6 +8,7 @@ from utils import get_datetime_till_expiration
 class DealModel(QSqlQueryModel):
     success = Signal()
     error = Signal()
+    no_record = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -52,6 +53,8 @@ class DealModel(QSqlQueryModel):
         if not Qquery.exec():
             self.error.emit()
         else:
+            if not Qquery.first():
+                self.no_record.emit()
             self.setQuery(Qquery)
             self.success.emit()
 

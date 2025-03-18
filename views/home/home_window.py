@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt
 from views.home.search_widget import SearchWidget
 from views.home.products_table import SearchBox
 from views.home.basket_widget import BasketWidget
+from utils import load_settings
 
 class HomeWindow(QWidget):
     def __init__(self, db, menu):
@@ -52,6 +53,7 @@ class HomeWindow(QWidget):
         layout.addWidget(self.checkout)
 
         self.setLayout(layout)
+        self.load_settings()
         
     def handle_search(self):
         str = self.search_widget.search_input.text()
@@ -69,4 +71,8 @@ class HomeWindow(QWidget):
             self.search_widget.search_input.setText("")
     
     def load_settings(self):
-        pass
+        settings = load_settings()
+        if not settings["permissions"]["payments_window"]["view"]:
+            self.menu.go_to_payments_btn.hide()
+        else:
+            self.menu.go_to_payments_btn.show()

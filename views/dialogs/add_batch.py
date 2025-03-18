@@ -42,7 +42,7 @@ class AddBatchDialog(QDialog):
         search_layout = QHBoxLayout()
         search_layout.addWidget(QLabel("Código:"))
         search_layout.addWidget(self.code_input)
-        search_layout.addWidget(QLabel("Nombre:"))
+        search_layout.addWidget(QLabel("Producto:"))
         search_layout.addWidget(self.product_input)
         
         form = QFormLayout()
@@ -53,6 +53,12 @@ class AddBatchDialog(QDialog):
         self.message_label = QLabel()
 
         button_box = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Save)
+
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
+        save_btn = button_box.button(QDialogButtonBox.Save)
+        save_btn.setText("Guardar")
 
         button_box.rejected.connect(self.close)
         button_box.accepted.connect(self.validate_input)

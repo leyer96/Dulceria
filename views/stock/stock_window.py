@@ -18,6 +18,7 @@ from views.dialogs.add_batch import AddBatchDialog
 from views.dialogs.edit_stock import EditStockDialog
 from views.dialogs.add_discount import AddDiscountDialog
 from views.dialogs.add_deal import AddDealDialog
+from views.dialogs.question import QuestionDialog
 from utils import Paths, toggle_btns_state, load_settings
 
 class StockWindow(QWidget):
@@ -72,6 +73,7 @@ class StockWindow(QWidget):
         self.add_discount_btn.clicked.connect(self.open_add_discount_dialog)
         self.add_deal_btn.clicked.connect(self.open_add_deal_dialog)
         self.stock_model.success.connect(lambda: self.edit_stock_btn.setEnabled(False))
+        self.stock_model.no_record.connect(lambda: QMessageBox.information(self, "Sin Resultados", "No se encontró inventario para valor buscado."))
         self.batch_model.success.connect(lambda: self.resolve_batch_btn.setEnabled(False))
         self.batch_model.success.connect(lambda: self.add_deal_btn.setEnabled(False))
         self.batch_model.success.connect(lambda: self.add_discount_btn.setEnabled(False))
@@ -171,8 +173,6 @@ class StockWindow(QWidget):
         if row != -1:
             batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
             dlg = AddDiscountDialog(batch_id)
-            # dlg.saved.connect(self.stock_model.refresh_table)
-            # dlg.saved.connect(self.batch_model.refresh_table)
             dlg.saved.connect(self.discount_added.emit)
             dlg.saved.connect(lambda: QMessageBox.information(self, "Descuento Guardado", "Descuento guardado con éxito"))
             dlg.exec()
@@ -182,19 +182,25 @@ class StockWindow(QWidget):
         if row != -1:
             batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
             dlg = AddDealDialog(batch_id)
-            # dlg.saved.connect(self.stock_model.refresh_table)
-            # dlg.saved.connect(self.batch_model.refresh_table)
             dlg.saved.connect(self.deal_added.emit)
             dlg.exec()
 
     def resolve_batch(self):
         row = self.selected_batch_row
         if row > -1:
+            question_dlg = QuestionDialog("¿Quieres resolver este lote?")
             batch_id = self.batch_model.data(self.batch_model.index(row, 0), Qt.DisplayRole)
-            self.batch_model.update_batch_show_status(batch_id)
+            question_dlg.accepted.connect(lambda: self.batch_model.update_batch_show_status(batch_id))
+            question_dlg.accepted.connect(self.batch_model.refresh_table)
+            question_dlg.accepted.connect(lambda: print("BATCH RESOLVED"))
+            question_dlg.exec()
 
     def load_settings(self):
         settings = load_settings()
+        if not settings["permissions"]["payments_window"]["view"]:
+            self.menu.go_to_payments_btn.hide()
+        else:
+            self.menu.go_to_payments_btn.show()
         if not settings["permissions"]["stock_window"]["edit"]:
             self.edit_stock_btn.hide()
         else:

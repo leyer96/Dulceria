@@ -223,6 +223,8 @@ def drop_test_tables():
     cur.execute("DROP TABLE IF EXISTS product")
     cur.execute("DROP TABLE IF EXISTS stock")
     cur.execute("DROP TABLE IF EXISTS batch")
+    cur.execute("DROP TABLE IF EXISTS deal")
+    cur.execute("DROP TABLE IF EXISTS discount")
 
 def drop_db_tables():
     con = sqlite3.connect(Paths.db())
@@ -232,6 +234,8 @@ def drop_db_tables():
     cur.execute("DROP TABLE IF EXISTS product")
     cur.execute("DROP TABLE IF EXISTS stock")
     cur.execute("DROP TABLE IF EXISTS batch")
+    cur.execute("DROP TABLE IF EXISTS deal")
+    cur.execute("DROP TABLE IF EXISTS discount")
 
 
 def save_payment(payment_data, products):
@@ -385,6 +389,7 @@ def substract_from_stock(products, deals_0, deals_1):
     con = sqlite3.connect(Paths.test("db.db"))
     # con = sqlite3.connect(Paths.db())
     cur = con.cursor()
+    couldnt_update = []
     try:
         for product in products:
             product_id = product[0]
@@ -404,14 +409,14 @@ def substract_from_stock(products, deals_0, deals_1):
                 new_amount = max(0, int(prev_amount - amount))
                 cur.execute("UPDATE stock SET amount = ? WHERE stock.product_id = ?", (new_amount, product_id))
             else:
+                couldnt_update.append(name)
                 print("ERROR DE EMPAREJAMIENTO CON STOCK REAL")
-                return False
     except sqlite3.Error as e:
         print(e)
-        return False
+        return True
     else:
         con.commit()
-        return True
+        return couldnt_update
 
 def update_discount(products, discounts):
     con = sqlite3.connect(Paths.test("db.db"))

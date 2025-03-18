@@ -50,7 +50,8 @@ class BatchModel(QSqlQueryModel):
         if not Qquery.exec():
             self.error.emit()
         else:
-            self.setQuery(Qquery)
+            if Qquery.first():
+                self.setQuery(Qquery)
             self.success.emit()
 
     def get_all_batchs(self):

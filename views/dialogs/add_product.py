@@ -37,6 +37,13 @@ class AddItemDialog(QDialog):
         form.addRow("Código", self.code_input)
 
         button_box = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Save)
+
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
+        save_btn = button_box.button(QDialogButtonBox.Save)
+        save_btn.setText("Guardar")
+
         button_box.accepted.connect(self.validate_input)
         button_box.rejected.connect(self.close)
 

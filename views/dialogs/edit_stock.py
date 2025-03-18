@@ -23,7 +23,13 @@ class EditStockDialog(QDialog):
         self.amount_input.setSingleStep(1)
         self.amount_input.setValue(product_data["amount"])
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
+        save_btn = button_box.button(QDialogButtonBox.Save)
+        save_btn.setText("Guardar")
 
         button_box.accepted.connect(self.update_stock)
         button_box.rejected.connect(self.close)

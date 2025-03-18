@@ -29,7 +29,7 @@ class DealsWindow(QWidget):
         self.discount_table = QTableView()
         self.deal_model = DealModel(db)
         self.discount_model = DiscountModel(db)
-        deals_title = QLabel("Promociones")
+        self.deals_title = QLabel("Promociones")
         discounts_title = QLabel("Descuentos")
         self.delete_deal_btn = QPushButton(QIcon(Paths.icon("minus-button.png")), "Eliminar")
         self.delete_discount_btn = QPushButton(QIcon(Paths.icon("minus-button.png")), "Eliminar")
@@ -54,7 +54,7 @@ class DealsWindow(QWidget):
         self.menu.go_to_deals_btn.setEnabled(False)
 
         
-        deals_title.setStyleSheet("font-size: 30px; font-weight: bold")
+        self.deals_title.setStyleSheet("font-size: 30px; font-weight: bold")
 
          # SIGNALS
         self.search_widget.search_btn.clicked.connect(self.handle_search)
@@ -73,7 +73,7 @@ class DealsWindow(QWidget):
         layout = QHBoxLayout()
 
         left_layout = QVBoxLayout()
-        left_layout.addWidget(deals_title)
+        left_layout.addWidget(self.deals_title)
         left_layout.addWidget(self.search_widget)
         left_layout.addWidget(self.deal_table)
         left_layout.addWidget(self.delete_deal_btn)
@@ -97,8 +97,18 @@ class DealsWindow(QWidget):
         self.deal_model.refresh_table()
         self.discount_model.refresh_table()
 
+        # self.get_n_deals()
         self.load_settings()
         
+    def get_n_deals(self):
+        con = sqlite3.connect(Paths.test("db.db"))
+        # con = sqlite3.connect(Paths.db())
+        cur = con.cursor()
+        n_deals = len(cur.execute("SELECT * FROM deal").fetchall())
+        n_discounts = len(cur.execute("SELECT * FROM discount").fetchall())
+        total = n_deals + n_discounts
+        self.deals_title.setText(f"Promociones ({total} activas)")
+    
     def handle_search(self):
         str = self.search_widget.search_input.text()
         self.search_str = str
@@ -170,6 +180,10 @@ class DealsWindow(QWidget):
 
     def load_settings(self):
         settings = load_settings()
+        if not settings["permissions"]["payments_window"]["view"]:
+            self.menu.go_to_payments_btn.hide()
+        else:
+            self.menu.go_to_payments_btn.show()
         if not settings["permissions"]["deals_window"]["delete_discount"]:
             self.delete_discount_btn.hide()
         else:

@@ -30,6 +30,12 @@ class RegisterPaymentDialog(QDialog):
         form.addRow("Nota", self.note)
 
         button_box = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Save)
+
+        save_btn = button_box.button(QDialogButtonBox.Save)
+        save_btn.setText("Guardar")
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+        
         button_box.accepted.connect(self.validate_input)
         button_box.rejected.connect(self.close)
 

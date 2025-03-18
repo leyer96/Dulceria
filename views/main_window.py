@@ -49,7 +49,9 @@ class MainWindow(QMainWindow):
                 elif isinstance(wi, StockWindow):
                     if isinstance(wj, DealsWindow):
                         wi.discount_added.connect(wj.discount_model.refresh_table)
+                        wi.discount_added.connect(lambda: print("DISCOUNT ADDED"))
                         wi.deal_added.connect(wj.deal_model.refresh_table)
+                        wi.deal_added.connect(lambda: print("DEAL ADDED"))
                     # wj.menu.go_to_stock.connect(wi.stock_model.get_all_stock)
                     # wj.menu.go_to_stock.connect(wi.batch_model.get_all_batchs)
                 elif isinstance(wi, AdminWindow):

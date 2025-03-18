@@ -1,5 +1,4 @@
 from PySide6.QtWidgets import (
-    QCheckBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -28,9 +27,9 @@ class SearchWidget(QWidget):
         # FILTER BY SECTION
         filter_label = QLabel("Filtrar por:")
         self.filter_by_name = QRadioButton("Nombre")
-        self.filter_by_name.setChecked(True)
         self.filter_by_category = QRadioButton("Categoría")
         self.filter_by_code = QRadioButton("Código")
+        self.filter_by_code.setChecked(True)
 
         filter_section_layout = QHBoxLayout()
         filter_section_layout.addWidget(filter_label)

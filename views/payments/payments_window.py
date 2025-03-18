@@ -41,8 +41,6 @@ class PaymentsWindow(QWidget):
             self.cash_amount_label = QLabel()
             self.card_amount_label = QLabel()
 
-            self.spacer = QWidget()
-
             btns_layout = QHBoxLayout()
             btns_layout.addWidget(self.view_details_btn)
             btns_layout.addWidget(self.export_data_btn)
@@ -63,6 +61,7 @@ class PaymentsWindow(QWidget):
             self.model.success.connect(self.calculate_amount)
             self.model.success.connect(lambda: self.view_details_btn.setEnabled(False))
             self.model.error.connect(lambda: self.view_details_btn.setEnabled(False))
+            self.model.no_record.connect(lambda: QMessageBox.information(self, "Sin Resultados", "No se registraron pagos entre las fechas seleccionadas"))
 
             self.filler = QWidget()
 
@@ -84,7 +83,6 @@ class PaymentsWindow(QWidget):
             left_layout.addWidget(self.search_widget)
             left_layout.addWidget(self.table)
             left_layout.addLayout(btns_layout)
-            left_layout.addWidget(self.spacer)
 
             right_layout = QVBoxLayout()
             right_layout.addWidget(self.menu)
@@ -102,7 +100,6 @@ class PaymentsWindow(QWidget):
             self.setLayout(layout)
 
             self.model.get_todays_payment()
-
             self.load_settings()
 
       def on_clicked_row(self, index):
@@ -179,30 +176,7 @@ class PaymentsWindow(QWidget):
                   QMessageBox.information(self, "Estatus", "No hay datos que exportar con los parámetros seleccionados.")
       
       def load_settings(self):
-            settings = load_settings()
-            if not settings["permissions"]["payments_window"]["view"]:
-                  self.search_widget.hide()
-                  self.table.hide()
-                  self.view_details_btn.hide()
-                  self.export_data_btn.hide()
-                  self.export_data_btn.hide()
-                  self.export_data_btn.hide()
-                  self.cash_label.hide()
-                  self.card_label.hide()
-                  self.cash_amount_label.hide()
-                  self.card_amount_label.hide()
-                  self.spacer.show()
-            else:
-                  self.filler.hide()
-                  self.search_widget.show()
-                  self.table.show()
-                  self.view_details_btn.show()
-                  self.export_data_btn.show()
-                  self.card_label.show()
-                  self.cash_label.show()
-                  self.card_amount_label.show()
-                  self.cash_amount_label.show()
-                  self.spacer.hide()
+            pass
 
       def calculate_amount(self):
             rows = self.model.rowCount()

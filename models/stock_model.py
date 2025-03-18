@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, Signal
 class StockModel(QSqlQueryModel):
     error = Signal()
     success = Signal()
+    no_record = Signal()
     def __init__(self, db):
         super().__init__()
         self.db = db
@@ -16,7 +17,7 @@ class StockModel(QSqlQueryModel):
             if index.column() == 1 or index.column() == 2:
                     return value.capitalize()
             return value
-    def search(self, search_str, filter):
+    def search(self, search_str, filter, show_msg=True):
         self.search_str = search_str
         self.filter = filter
         query = """
@@ -32,7 +33,11 @@ class StockModel(QSqlQueryModel):
         if not Qquery.exec():
             self.error.emit()
         else:
-            self.setQuery(Qquery)
+            if not Qquery.first():
+                if show_msg:
+                    self.no_record.emit()
+            else:
+                self.setQuery(Qquery)
             self.success.emit()
 
     def get_all_stock(self):
@@ -48,7 +53,7 @@ class StockModel(QSqlQueryModel):
 
     def refresh_table(self):
         if self.filter:
-            self.search(self.search_str, self.filter)
+            self.search(self.search_str, self.filter, show_msg=False)
         else:
             self.get_all_stock()
 

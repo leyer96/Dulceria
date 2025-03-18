@@ -40,6 +40,13 @@ class EditItemDialog(QDialog):
         self.msgs_label = QLabel()
 
         button_box = QDialogButtonBox(QDialogButtonBox.Cancel | QDialogButtonBox.Save)
+
+        cancel_btn = button_box.button(QDialogButtonBox.Cancel)
+        cancel_btn.setText("Cancelar")
+
+        save_btn = button_box.button(QDialogButtonBox.Save)
+        save_btn.setText("Guardar")
+
         button_box.accepted.connect(self.validate_input)
         button_box.rejected.connect(self.close)
 
@@ -62,15 +69,17 @@ class EditItemDialog(QDialog):
         query = """
             SELECT * FROM product WHERE id = ?
         """
-        product_data = cur.execute(query, self.product_id).fetchone()
-        if product_data:        
+        try:
+            product_data = cur.execute(query, (self.product_id,)).fetchone()
+        except sqlite3.Error as e:
+            print(e)
+            QMessageBox.information(self, "Error en Búsqueda", "No se encontraron los datos correspondientes al producto.")
+        else:        
             self.name_input.setText(product_data[1])
             self.brand_input.setText(product_data[2])
             self.price_input.setValue(product_data[3])
             self.category_input.setCurrentText(product_data[4])
             self.code_input.setText(product_data[5])
-        else:
-            QMessageBox.information(self, "Error en Búsqueda", "No se encontraron los datos correspondientes al producto.")
 
     def validate_input(self):
         self.msgs_label.hide()
