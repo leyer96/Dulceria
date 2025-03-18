@@ -25,12 +25,15 @@ class BasketModel(QAbstractTableModel):
     def data(self, index, role):
         if role == Qt.DisplayRole:
             value = self._data[index.row()][index.column()]
-            if index.column() == 4:
+            col = index.column()
+            if col == 3:
+                value = str(value) + " $"
+            elif col == 4:
                 if type(value) == float:
                     return f"{value} gr."
                 else:
                     return value
-            return self._data[index.row()][index.column()]
+            return value
         
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole:
@@ -38,6 +41,7 @@ class BasketModel(QAbstractTableModel):
                 return self.headers[section]
             
     def load_item(self, basket_item):
+        basket_item[3] = float(basket_item[3].split("$")[0].strip())
         item_grouped = self.group_equals(basket_item)
         if item_grouped is not False:
             # CASE: ITEM IN BASKET
@@ -175,7 +179,9 @@ class BasketModel(QAbstractTableModel):
     def calculate_total(self):
         total = 0
         for item in self._data:
-            total += item[3]*item[4]
+            price = item[3]
+            amount = item[4]
+            total += price*amount
         self.total = total
         self.total_calculated.emit(total)
 

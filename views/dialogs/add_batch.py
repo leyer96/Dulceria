@@ -46,7 +46,7 @@ class AddBatchDialog(QDialog):
         search_layout.addWidget(self.product_input)
         
         form = QFormLayout()
-        form.addRow("Cantidad:", self.amount_input)
+        form.addRow("Cantidad: (unidades o gr.)", self.amount_input)
         form.addRow("Fecha de Caducidad:", self.expiration_date_input)
         form.addRow("Sin caducidad", self.no_exipration_option)
 

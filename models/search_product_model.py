@@ -17,9 +17,15 @@ class SearchModel(QSqlQueryModel):
     def data(self, index, role):
         value = super().data(index, Qt.DisplayRole)
         if role == Qt.DisplayRole:
-            if index.column() == 1 or index.column() == 2:
+            col = index.column()
+            if col == 1 or col == 2:
                 capitalized_value = value.capitalize()
                 return capitalized_value
+            elif col == 3:
+                value = str(value) + " $"
+                product_type = super().data(self.index(index.row(), 4), Qt.DisplayRole)
+                if product_type == "Granel":
+                    value += " x gr."
             return value
     
     def search(self, search_str, filter, show_msg=True):

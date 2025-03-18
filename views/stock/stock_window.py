@@ -34,7 +34,7 @@ class StockWindow(QWidget):
         self.batch_table = QTableView()
         self.stock_model = StockModel(db)
         self.batch_model = BatchModel(db)
-        stock_title = QLabel("Stock")
+        stock_title = QLabel("Inventario")
         batch_title = QLabel("Lotes")
         self.edit_stock_btn = QPushButton(QIcon(Paths.icon("pencil.png")), "Editar Stock")
         self.add_batch_btn = QPushButton(QIcon(Paths.icon("plus-button.png")),"Agregar Lote")
@@ -51,6 +51,7 @@ class StockWindow(QWidget):
 
         self.batch_table.setModel(self.batch_model)
         self.batch_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.batch_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.batch_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.batch_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.batch_table.clicked.connect(self.on_clicked_batch_row)

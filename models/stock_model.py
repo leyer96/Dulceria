@@ -8,14 +8,19 @@ class StockModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["ID", "Producto", "Marca", "Categoría", "Cantidad en Stock"]
+        self.headers = ["ID", "Producto", "Marca", "Categoría", "Cantidad en Inventario"]
         self.filter = None
     
     def data(self, index, role):
         value = super().data(index, Qt.DisplayRole)
         if role == Qt.DisplayRole:
-            if index.column() == 1 or index.column() == 2:
+            col = index.column()
+            if col == 1 or col == 2:
                     return value.capitalize()
+            elif col == 4:
+                product_type = super().data(self.index(index.row(), 3), Qt.DisplayRole)
+                if product_type == "Granel":
+                    value = str(value) + " gr"
             return value
     def search(self, search_str, filter, show_msg=True):
         self.search_str = search_str

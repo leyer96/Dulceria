@@ -10,23 +10,32 @@ class BatchModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Lote", "Marca", "Producto", "Categoría", "Cantidad en Lote", "Fecha de Caducidad", "Días para Caducar"]
+        self.headers = ["Lote", "Fecha de Entrega", "Marca", "Producto", "Categoría", "Cantidad en Lote", "Fecha de Caducidad", "Días para Caducar"]
         self.filter = None
         self.search_str = ""
 
     def data(self, index, role):
         value = super().data(index, Qt.DisplayRole)
         if role == Qt.DisplayRole:
-            if index.column() == 1 or index.column() == 2:
+            col = index.column()
+            if col == 1:
+                value = "-".join(reversed(value.split()[0].split("-")))
+            elif col == 2 or col == 3:
                 return value.capitalize()
-            elif index.column() == 5:
+            elif col == 5:
+                product_type = super().data(self.index(index.row(), 4), Qt.DisplayRole)
+                if product_type == "Granel":
+                    value = str(value) + " gr"
+            elif col == 4:
                 if value == no_exipration_date_date:
                     return ""
                 date_info = value.split("-")
                 date_info.reverse()
                 return "-".join(date_info)
-            elif index.column() == 6:
-                expiration_date_str = super().data(super().index(index.row(),5), Qt.DisplayRole)
+            elif col == 6:
+                value = "-".join(reversed(value.split("-")))
+            elif col == 7:
+                expiration_date_str = super().data(super().index(index.row(),6), Qt.DisplayRole)
                 return get_days_till_expiration(expiration_date_str)
             return value
             
@@ -37,7 +46,7 @@ class BatchModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT batch.id, product.name, product.brand, product.category, batch.amount, batch.expiration_date 
+            SELECT batch.id, batch.timestamp, product.name, product.brand, product.category, batch.amount, batch.expiration_date 
             FROM batch
             JOIN product ON batch.product_id = product.id
             WHERE product.{} LIKE :search_term AND batch.show = 1
@@ -56,7 +65,7 @@ class BatchModel(QSqlQueryModel):
 
     def get_all_batchs(self):
         query = """
-            SELECT batch.id, product.name, product.brand, product.category, batch.amount, batch.expiration_date 
+            SELECT batch.id, batch.timestamp, product.name, product.brand, product.category, batch.amount, batch.expiration_date 
             FROM batch
             JOIN product ON batch.product_id = product.id
             WHERE batch.show = 1

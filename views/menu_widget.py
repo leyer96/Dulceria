@@ -14,7 +14,7 @@ class Menu(QWidget):
         super().__init__()
         self.go_to_products_btn = QPushButton(QIcon(Paths.icon("price-tag--arrow.png")),"Productos")
         self.go_to_home_btn = QPushButton(QIcon(Paths.icon("home--arrow.png")),"Inicio")
-        self.go_to_stock_btn = QPushButton(QIcon(Paths.icon("clipboard--arrow.png")),"Stock")
+        self.go_to_stock_btn = QPushButton(QIcon(Paths.icon("clipboard--arrow.png")),"Inventario")
         self.go_to_payments_btn = QPushButton(QIcon(Paths.icon("money--arrow.png")),"Pagos")
         self.go_to_admin_window_btn = QPushButton(QIcon(Paths.icon("computer--arrow.png")),"Admin")
         self.go_to_deals_btn = QPushButton(QIcon(Paths.icon("star.png")), "Promociones")
