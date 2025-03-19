@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QLineEdit,
     QDialogButtonBox,
+    QRadioButton,
 )
 from PySide6.QtCore import Signal, Qt
 from utils import Paths
@@ -27,12 +28,17 @@ class AddItemDialog(QDialog):
         self.brand_input = QLineEdit()
         self.price_input = QDoubleSpinBox()
         self.price_input.setRange(0,9999)
+        self.buy_price_option = QRadioButton()
+        self.buy_price_input = QDoubleSpinBox()
+        self.buy_price_input.setRange(0,9999)
         self.category_input = QComboBox()
         self.category_input.addItems(categories)
         self.code_input = QLineEdit()
         form.addRow("Producto*", self.name_input)
         form.addRow("Marca", self.brand_input)
-        form.addRow("Precio*", self.price_input)
+        form.addRow("Precio de venta*", self.price_input)
+        form.addRow("Agregar precio de compra", self.buy_price_option)
+        form.addRow("Precio de compra", self.buy_price_input)
         form.addRow("Categoría*", self.category_input)
         form.addRow("Código", self.code_input)
 
@@ -52,6 +58,11 @@ class AddItemDialog(QDialog):
         self.message_label.setWordWrap(True)
         self.message_label.setStyleSheet("color: red;")
 
+        # CONFIG
+        self.buy_price_input.setEnabled(False)
+        # SIGNAL
+        self.buy_price_option.toggled.connect(lambda: self.buy_price_input.setEnabled(not self.buy_price_input.isEnabled()))
+
         layout = QVBoxLayout()
         layout.addLayout(form)
         layout.addWidget(self.message_label)
@@ -67,37 +78,43 @@ class AddItemDialog(QDialog):
     
     def validate_input(self):
         self.message_label.hide()
+        error_message = []
         name = self.name_input.text().strip().lower()
         brand = self.brand_input.text().strip().lower()
         price = self.price_input.value()
         category = self.category_input.currentText()
         code = self.code_input.text().strip()
-        if name and price > 0 and category != self.categories[0]:
+        buy_price = self.buy_price_input.value()
+        if not name:
+            error_message.append("Agregue el nombre del producto")
+        if price == 0:
+            error_message.append("Agregue el precio del producto")
+        if category != self.categories[0]:
+            error_message.append("Seleccione una categoría")
+        if self.buy_price_option.isChecked():
+            if buy_price == 0:
+                error_message.append("Agregue una precio de compra o deshabilite la opción.")
+        if not error_message:
             name = name.lower()
             brand= brand.lower()
             item_data = {
                 "name": name,
                 "brand": brand,
                 "price": price,
+                "buy_price": buy_price,
                 "category": category,
                 "code": code
             }
             self.add_item(item_data)
         else:
-            error_message = ""
-            if not name:
-                error_message += "\n Agregue un nombre."
-            if price == 0:
-                error_message += "\n Agregue un precio."
-            if category == self.categories[0]:
-                error_message += "\n Seleccione una categoría"
-            self.message_label.setText(error_message)
+            self.message_label.setText("\n".join(error_message))
             self.message_label.show()
 
     def add_item(self, item_data):
         name = item_data["name"]
         brand = item_data["brand"]
         price = item_data["price"]
+        buy_price = item_data["buy_price"]
         category = item_data["category"]
         code = item_data["code"]
         if not code:
@@ -107,13 +124,15 @@ class AddItemDialog(QDialog):
         cur = con.cursor()
         try:
             cur.execute("""
-                INSERT INTO product (name, brand, price, category, code) VALUES(?,?,?,?,?)
-            """, (name, brand, price, category, code))
+                INSERT INTO product (name, brand, price, category, code, buy_price) VALUES(?,?,?,?,?,?)
+            """, (name, brand, price, category, code, buy_price))
             con.commit()
-        except sqlite3.Error as e:
+        except sqlite3.IntegrityError as e:
             print(e)
             self.message_label.setText("Ya existe un producto con este nombre o código. Modifique el producto o elimínelo.")
             self.message_label.show()
+        except sqlite3.Error as e:
+            self.message_label.setText("Ha ocurrido un error. Contacte al desarrollador")
         else:
             product_id = cur.lastrowid
             try:

@@ -16,12 +16,17 @@ class EditStockDialog(QDialog):
         super().__init__()
 
         self.product_id = product_data["product_id"]
-
-        product_label = QLabel(f"{product_data['brand']} {product_data['product']}")
+        if product_data["type"] == "Granel":
+            product_label = QLabel(f"{product_data['brand']} {product_data['product']} (gr.)")
+        else:
+            product_label = QLabel(f"{product_data['brand']} {product_data['product']}")
         self.amount_input = QSpinBox()
         self.amount_input.setRange(0, 9999)
         self.amount_input.setSingleStep(1)
-        self.amount_input.setValue(product_data["amount"])
+        amount = product_data["amount"]
+        if type(amount) == str:
+            amount = float(amount.split()[0])
+        self.amount_input.setValue(amount)
 
         button_box = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
 

@@ -11,7 +11,7 @@ class SearchModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Id", "Producto", "Marca", "Precio", "Categoría", "Código"]
+        self.headers = ["Id", "Producto", "Marca", "Precio de Venta", "Precio de Compra", "Categoría", "Código"]
         self.filter = None
     
     def data(self, index, role):
@@ -32,7 +32,7 @@ class SearchModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT id, name, brand, price, category, code FROM product
+            SELECT * FROM product
             WHERE {} LIKE :search_str
             LIMIT 50
         """.format(filter)

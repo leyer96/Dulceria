@@ -151,12 +151,14 @@ class StockWindow(QWidget):
             product_id = self.stock_model.data(self.stock_model.index(row, 0), Qt.DisplayRole)
             product = self.stock_model.data(self.stock_model.index(row, 1), Qt.DisplayRole)
             brand = self.stock_model.data(self.stock_model.index(row, 2), Qt.DisplayRole)
+            type = self.stock_model.data(self.stock_model.index(row, 3), Qt.DisplayRole)
             amount = self.stock_model.data(self.stock_model.index(row, 4), Qt.DisplayRole)
             product_data = {
                 "product_id": product_id,
                 "product": product,
                 "brand": brand,
-                "amount": amount
+                "amount": amount,
+                "type": type
             }
             dlg = EditStockDialog(product_data)
             dlg.saved.connect(self.stock_model.refresh_table)

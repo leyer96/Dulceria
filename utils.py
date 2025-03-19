@@ -54,6 +54,7 @@ def create_test_tables():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(100) NOT NULL UNIQUE,
                 brand VARCHAR(50),
+                buy_price FLOAT,
                 price FLOAT NOT NULL,
                 category VARCHAR(20) NOT NULL,
                 code TEXT UNIQUE
@@ -214,6 +215,11 @@ def create_db_tables():
                 FOREIGN KEY (product_id) REFERENCES product(id)
                 )
         """)
+    
+def drop_test_table(table):
+    con = sqlite3.connect(Paths.test("db.db"))
+    cur = con.cursor()
+    cur.execute("DROP TABLE IF EXISTS {}".format(table))
     
 def drop_test_tables():
     con = sqlite3.connect(Paths.test("db.db"))
