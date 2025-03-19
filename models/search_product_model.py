@@ -11,7 +11,7 @@ class SearchModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Id", "Producto", "Marca", "Precio de Venta", "Precio de Compra", "Categoría", "Código"]
+        self.headers = ["Id", "Producto", "Marca", "Precio de Venta", "Categoría"]
         self.filter = None
     
     def data(self, index, role):
@@ -22,17 +22,20 @@ class SearchModel(QSqlQueryModel):
                 capitalized_value = value.capitalize()
                 return capitalized_value
             elif col == 3:
-                value = str(value) + " $"
-                product_type = super().data(self.index(index.row(), 4), Qt.DisplayRole)
-                if product_type == "Granel":
-                    value += " x gr."
+                if value:
+                    value = "$ " + str(value)
+                    product_type = super().data(self.index(index.row(), 4), Qt.DisplayRole)
+                    if product_type == "Granel":
+                        value += " x gr."
+                else:
+                    value = "NO AGREGADO"
             return value
     
     def search(self, search_str, filter, show_msg=True):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT * FROM product
+            SELECT id, name, brand, price, category FROM product
             WHERE {} LIKE :search_str
             LIMIT 50
         """.format(filter)
@@ -51,7 +54,7 @@ class SearchModel(QSqlQueryModel):
 
     def get_all_prodcuts(self):
         query = """
-            SELECT * FROM product
+            SELECT id, name, brand, price, category FROM product
             ORDER BY NAME
             LIMIT 50
         """
@@ -64,7 +67,7 @@ class SearchModel(QSqlQueryModel):
             self.search(self.search_str, self.filter, show_msg=False)
         else:
             query = """
-            SELECT * FROM product
+            SELECT id, name, brand, price, category FROM product
             ORDER BY NAME
             LIMIT 50
             """

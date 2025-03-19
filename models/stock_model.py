@@ -8,7 +8,7 @@ class StockModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["ID", "Producto", "Marca", "Categoría", "Cantidad en Inventario"]
+        self.headers = ["Id", "Producto", "Marca", "Categoría", "Cantidad en Inventario"]
         self.filter = None
     
     def data(self, index, role):

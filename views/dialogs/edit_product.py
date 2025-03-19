@@ -7,7 +7,8 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QLabel,
     QDialogButtonBox,
-    QMessageBox
+    QMessageBox,
+    QCheckBox
 )
 from PySide6.QtCore import Signal
 from utils import Paths
@@ -27,6 +28,9 @@ class EditItemDialog(QDialog):
         self.name_input = QLineEdit()
         self.brand_input = QLineEdit()
         self.price_input = QDoubleSpinBox()
+        self.price_input.setRange(0,9999)
+        self.buy_price_input.option = QCheckBox()
+        self.buy_price_input = QDoubleSpinBox()
         self.price_input.setRange(0,9999)
         self.category_input = QComboBox()
         self.category_input.addItems(categories)
@@ -67,7 +71,7 @@ class EditItemDialog(QDialog):
         # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         query = """
-            SELECT * FROM product WHERE id = ?
+            SELECT name,brand,price,buy_price,category,code FROM product WHERE id = ?
         """
         try:
             product_data = cur.execute(query, (self.product_id,)).fetchone()
@@ -75,9 +79,10 @@ class EditItemDialog(QDialog):
             print(e)
             QMessageBox.information(self, "Error en Búsqueda", "No se encontraron los datos correspondientes al producto.")
         else:        
-            self.name_input.setText(product_data[1])
-            self.brand_input.setText(product_data[2])
-            self.price_input.setValue(product_data[3])
+            self.name_input.setText(product_data[0])
+            self.brand_input.setText(product_data[1])
+            self.price_input.setValue(product_data[2])
+            buy_price = self.product_data[3]
             self.category_input.setCurrentText(product_data[4])
             self.code_input.setText(product_data[5])
 

@@ -9,7 +9,7 @@ class BasketModel(QAbstractTableModel):
     def __init__(self):
         super().__init__()
         self._data = []
-        self.headers = ["ID", "Producto", "Marca", "Precio", "Cantidad"]
+        self.headers = ["Id", "Producto", "Marca", "Precio", "Cantidad"]
         self.total = 0
         self.discounts = []
         self.deals_0 = []
@@ -27,7 +27,9 @@ class BasketModel(QAbstractTableModel):
             value = self._data[index.row()][index.column()]
             col = index.column()
             if col == 3:
-                value = str(value) + " $"
+                value = "$ " + str(value)
+                if type(self._data[index.row()][col]) == float:
+                    value = value + " x gr."
             elif col == 4:
                 if type(value) == float:
                     return f"{value} gr."
@@ -41,7 +43,7 @@ class BasketModel(QAbstractTableModel):
                 return self.headers[section]
             
     def load_item(self, basket_item):
-        basket_item[3] = float(basket_item[3].split("$")[0].strip())
+        basket_item[3] = float(basket_item[3].split()[1].strip())
         item_grouped = self.group_equals(basket_item)
         if item_grouped is not False:
             # CASE: ITEM IN BASKET

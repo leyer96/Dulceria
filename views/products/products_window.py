@@ -119,9 +119,9 @@ class ProductsWindow(QWidget):
     def open_edit_dialog(self, row):
         if row != None:
             product_id = self.model.data(self.model.index(row, 0), Qt.DisplayRole)
-            dlg = EditItemDialog(self.db, product_id, self.categories)
-            dlg.item_edited.connect(self.model.refresh_table)
-            dlg.item_edited.connect(self.product_edited.emit)
+            dlg = AddItemDialog(self.db, self.categories, product_id=product_id)
+            dlg.saved.connect(self.model.refresh_table)
+            dlg.saved.connect(self.product_edited.emit)
             dlg.exec()
         
     def delete_product(self, row):
