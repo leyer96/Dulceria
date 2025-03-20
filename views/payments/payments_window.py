@@ -39,8 +39,10 @@ class PaymentsWindow(QWidget):
             title = QLabel("Pagos")
             self.view_details_btn = QPushButton(QIcon(Paths.icon("application-detail.png")),"Ver Detalles")
             self.export_data_btn = QPushButton(QIcon(Paths.icon("document-excel-csv.png")),"Exportar Datos")
-            self.cash_amount_label = QLabel()
-            self.card_amount_label = QLabel()
+
+            self.cash_label = QLabel("Efectivo: ")
+            self.card_label = QLabel("Tarjeta: ")
+            self.total_label = QLabel("Total: ")
 
             btns_layout = QHBoxLayout()
             btns_layout.addWidget(self.view_details_btn)
@@ -66,22 +68,16 @@ class PaymentsWindow(QWidget):
 
             self.filler = QWidget()
 
+            self.cash_label.setStyleSheet("font-size: 20px;")
+            self.card_label.setStyleSheet("font-size: 20px;")
+            self.total_label.setStyleSheet("font-size: 20px;")
+
             # LOGO
             logo_label = QLabel()
             logo_pixmap = QPixmap(Paths.image("dulceria_logo.png")).scaledToWidth(100)
             logo_label.setPixmap(logo_pixmap)
             
             # LAYOUT
-            self.cash_label = QLabel("Efectivo: ")
-            self.card_label = QLabel("Tarjeta: ")
-
-            cash_amount_layout = QHBoxLayout()
-            cash_amount_layout.addWidget(self.cash_label)
-            cash_amount_layout.addWidget(self.cash_amount_label)
-            card_amount_layout = QHBoxLayout()
-            card_amount_layout.addWidget(self.card_label)
-            card_amount_layout.addWidget(self.card_amount_label)
-
             layout = QHBoxLayout()
 
             left_layout = QVBoxLayout()
@@ -93,8 +89,9 @@ class PaymentsWindow(QWidget):
             right_layout = QVBoxLayout()
             right_layout.addWidget(logo_label)
             right_layout.addWidget(self.menu)
-            right_layout.addLayout(cash_amount_layout)
-            right_layout.addLayout(card_amount_layout)
+            right_layout.addWidget(self.cash_label)
+            right_layout.addWidget(self.card_label)
+            right_layout.addWidget(self.total_label)
             right_layout.insertSpacing(0, 30)
             right_layout.addStretch()
             right_layout.setAlignment(self.menu, Qt.AlignTop)
@@ -198,8 +195,9 @@ class PaymentsWindow(QWidget):
                         cash += amount
                   else:
                         card += amount
-            self.cash_amount_label.setText(f"${str(cash)}")
-            self.card_amount_label.setText(f"${str(card)}")
+            self.cash_label.setText(f"Efectivo: ${str(cash)}")
+            self.card_label.setText(f"Tarjeta: ${str(card)}")
+            self.total_label.setText(f"Total: ${str(card + cash)}")
               
 
                   
