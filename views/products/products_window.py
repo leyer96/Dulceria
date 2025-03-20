@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QLabel
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap
 from views.home.search_widget import SearchWidget
 from models.search_product_model import SearchModel
 from views.dialogs.add_product import AddItemDialog
@@ -57,6 +57,11 @@ class ProductsWindow(QWidget):
         self.model.success.connect(lambda: self.delete_product_btn.setEnabled(False))
         self.model.no_record.connect(lambda: QMessageBox.information(self, "Sin Emparejamiento", "No se encontró producto con la información proporcionada."))
         
+        # LOGO
+        logo_label = QLabel()
+        logo_pixmap = QPixmap(Paths.image("dulceria_logo.png")).scaledToWidth(100)
+        logo_label.setPixmap(logo_pixmap)
+        
         # LAYOUT
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.add_product_btn)
@@ -72,9 +77,12 @@ class ProductsWindow(QWidget):
         left_layout.addLayout(buttons_layout)
 
         right_layout = QVBoxLayout()
+        right_layout.addWidget(logo_label)
         right_layout.addWidget(self.menu)
-        right_layout.insertSpacing(0, 200)
+        right_layout.insertSpacing(0, 30)
+        right_layout.addStretch()
         right_layout.setAlignment(self.menu, Qt.AlignTop)
+        right_layout.setAlignment(logo_label,Qt.AlignHCenter)
 
         layout.addLayout(left_layout)
         layout.addLayout(right_layout)

@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QSpacerItem
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
 from PySide6.QtGui import QIcon
 from datetime import datetime
 from views.payments.search_widget import SearchWidget
@@ -65,6 +66,11 @@ class PaymentsWindow(QWidget):
 
             self.filler = QWidget()
 
+            # LOGO
+            logo_label = QLabel()
+            logo_pixmap = QPixmap(Paths.image("dulceria_logo.png")).scaledToWidth(100)
+            logo_label.setPixmap(logo_pixmap)
+            
             # LAYOUT
             self.cash_label = QLabel("Efectivo: ")
             self.card_label = QLabel("Tarjeta: ")
@@ -85,11 +91,14 @@ class PaymentsWindow(QWidget):
             left_layout.addLayout(btns_layout)
 
             right_layout = QVBoxLayout()
+            right_layout.addWidget(logo_label)
             right_layout.addWidget(self.menu)
             right_layout.addLayout(cash_amount_layout)
             right_layout.addLayout(card_amount_layout)
-            right_layout.insertSpacing(0, 200)
+            right_layout.insertSpacing(0, 30)
+            right_layout.addStretch()
             right_layout.setAlignment(self.menu, Qt.AlignTop)
+            right_layout.setAlignment(logo_label,Qt.AlignHCenter | Qt.AlignTop)
 
             layout.addLayout(left_layout)
             layout.addLayout(right_layout)

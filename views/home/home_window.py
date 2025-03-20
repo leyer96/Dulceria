@@ -1,13 +1,15 @@
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
-    QHBoxLayout
+    QHBoxLayout,
+    QLabel
 )
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QPixmap
+from PySide6.QtCore import Qt, QSize
 from views.home.search_widget import SearchWidget
 from views.home.products_table import SearchBox
 from views.home.basket_widget import BasketWidget
-from utils import load_settings
+from utils import load_settings, Paths
 
 class HomeWindow(QWidget):
     def __init__(self, db, menu):
@@ -29,6 +31,11 @@ class HomeWindow(QWidget):
         # CONFIG
         self.menu.go_to_home_btn.setEnabled(False)
         
+         # LOGO
+        logo_label = QLabel()
+        logo_pixmap = QPixmap(Paths.image("dulceria_logo.png")).scaledToWidth(100)
+        logo_label.setPixmap(logo_pixmap)
+
         # LAYOUT
         layout = QVBoxLayout()
 
@@ -39,9 +46,14 @@ class HomeWindow(QWidget):
         sublayout.addLayout(sublayout_left)
         
         sublayout_right = QVBoxLayout()
+        sublayout_right.addWidget(logo_label)
         sublayout_right.addWidget(self.menu)
-        sublayout_right.insertSpacing(0, 200)
+        sublayout_right.insertSpacing(0, 30)
+        sublayout_right.addStretch()
+
         sublayout_right.setAlignment(self.menu, Qt.AlignTop)
+        sublayout_right.setAlignment(logo_label,Qt.AlignHCenter | Qt.AlignTop)
+        
 
         sublayout.addLayout(sublayout_left)
         sublayout.addLayout(sublayout_right)
@@ -53,6 +65,7 @@ class HomeWindow(QWidget):
         layout.addWidget(self.checkout)
 
         self.setLayout(layout)
+
         self.load_settings()
         
     def handle_search(self):

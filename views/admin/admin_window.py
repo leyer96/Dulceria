@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QFormLayout
 )
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QPixmap
 from views.dialogs.authorize import AuthorizeDialog
 from utils import load_settings, save_settings, Paths
 import os
@@ -184,6 +185,11 @@ class AdminWindow(QWidget):
 
         login_btn.clicked.connect(self.authenticate)
     
+        # LOGO
+        logo_label = QLabel()
+        logo_pixmap = QPixmap(Paths.image("dulceria_logo.png")).scaledToWidth(100)
+        logo_label.setPixmap(logo_pixmap)
+        
         # LAYOUT
         layout = QHBoxLayout()
         left_layout = QVBoxLayout()
@@ -192,9 +198,12 @@ class AdminWindow(QWidget):
         left_layout.addWidget(self.login_widget)
 
         right_layout = QVBoxLayout()
+        right_layout.addWidget(logo_label)
         right_layout.addWidget(self.menu)
-        right_layout.insertSpacing(0, 200)
+        right_layout.insertSpacing(0, 30)
+        right_layout.addStretch()
         right_layout.setAlignment(self.menu, Qt.AlignTop)
+        right_layout.setAlignment(logo_label,Qt.AlignHCenter)
         
         layout.addLayout(left_layout)
         layout.addLayout(right_layout)

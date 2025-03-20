@@ -11,7 +11,7 @@ class MainWindow(QMainWindow):
     def __init__(self, db):
         super().__init__()
 
-        self.resize(700, 500)
+        # self.resize(700, 500)
  
         windows = [HomeWindow, ProductsWindow, PaymentsWindow, StockWindow, DealsWindow, AdminWindow]
         initialized_window = []
@@ -73,4 +73,5 @@ class MainWindow(QMainWindow):
         container.setLayout(container_layout)
         
         self.setCentralWidget(container)
-        self.showFullScreen()
+        self.show()
+        # self.showFullScreen()

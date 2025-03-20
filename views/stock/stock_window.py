@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap
 from views.home.search_widget import SearchWidget
 from models.stock_model import StockModel
 from models.batch_model import BatchModel
@@ -79,6 +79,11 @@ class StockWindow(QWidget):
         self.batch_model.success.connect(lambda: self.add_deal_btn.setEnabled(False))
         self.batch_model.success.connect(lambda: self.add_discount_btn.setEnabled(False))
         
+        # LOGO
+        logo_label = QLabel()
+        logo_pixmap = QPixmap(Paths.image("dulceria_logo.png")).scaledToWidth(100)
+        logo_label.setPixmap(logo_pixmap)
+        
         # LAYOUT
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.add_batch_btn)
@@ -98,9 +103,12 @@ class StockWindow(QWidget):
         left_layout.addLayout(buttons_layout)
 
         right_layout = QVBoxLayout()
+        right_layout.addWidget(logo_label)
         right_layout.addWidget(self.menu)
-        right_layout.insertSpacing(0, 200)
+        right_layout.insertSpacing(0, 30)
+        right_layout.addStretch()
         right_layout.setAlignment(self.menu, Qt.AlignTop)
+        right_layout.setAlignment(logo_label,Qt.AlignHCenter)
 
         layout.addLayout(left_layout)
         layout.addLayout(right_layout)

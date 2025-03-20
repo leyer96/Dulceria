@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap
 from views.home.search_widget import SearchWidget
 from models.discount_model import DiscountModel
 from models.deal_model import DealModel
@@ -69,6 +69,11 @@ class DealsWindow(QWidget):
         self.delete_discount_btn.clicked.connect(self.delete_discount)
 
         
+        # LOGO
+        logo_label = QLabel()
+        logo_pixmap = QPixmap(Paths.image("dulceria_logo.png")).scaledToWidth(100)
+        logo_label.setPixmap(logo_pixmap)
+        
         # LAYOUT
         layout = QHBoxLayout()
 
@@ -82,9 +87,12 @@ class DealsWindow(QWidget):
         left_layout.addWidget(self.delete_discount_btn)
 
         right_layout = QVBoxLayout()
+        right_layout.addWidget(logo_label)
         right_layout.addWidget(self.menu)
-        right_layout.insertSpacing(0, 200)
+        right_layout.insertSpacing(0, 30)
+        right_layout.addStretch()
         right_layout.setAlignment(self.menu, Qt.AlignTop)
+        right_layout.setAlignment(logo_label,Qt.AlignHCenter)
 
         layout.addLayout(left_layout)
         layout.addLayout(right_layout)

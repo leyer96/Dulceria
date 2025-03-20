@@ -2,7 +2,8 @@ import os
 class Paths:
     base = os.path.dirname(__file__)
     data = os.path.join(base, "data")
-    icons = os.path.join(base, "resources/icons")  
+    icons = os.path.join(base, "resources/icons")
+    images = os.path.join(base, "resources/images")
     models = os.path.join(base, "models")
     settings = os.path.join(base, "settings")
     style = os.path.join(base, "resources/styles.qss")
