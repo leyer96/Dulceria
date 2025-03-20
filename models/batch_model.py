@@ -10,7 +10,7 @@ class BatchModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Lote", "Fecha de Entrega", "Marca", "Producto", "Categoría", "Cantidad en Lote", "Fecha de Caducidad", "Días para Caducar"]
+        self.headers = ["Lote", "Fecha de Entrega", "Producto", "Marca", "Categoría", "Cantidad en Lote", "Fecha de Caducidad", "Días para Caducar"]
         self.filter = None
         self.search_str = ""
 

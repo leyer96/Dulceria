@@ -11,7 +11,7 @@ class SearchModel(QSqlQueryModel):
     def __init__(self, db):
         super().__init__()
         self.db = db
-        self.headers = ["Id", "Producto", "Marca", "Precio de Venta", "Categoría"]
+        self.headers = ["Id", "Producto", "Marca", "Precio de Venta", "Categoría", "Código"]
         self.filter = None
     
     def data(self, index, role):
@@ -35,7 +35,7 @@ class SearchModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT id, name, brand, price, category FROM product
+            SELECT id, name, brand, price, category, code FROM product
             WHERE {} LIKE :search_str
             LIMIT 50
         """.format(filter)
@@ -54,7 +54,7 @@ class SearchModel(QSqlQueryModel):
 
     def get_all_prodcuts(self):
         query = """
-            SELECT id, name, brand, price, category FROM product
+            SELECT id, name, brand, price, category, code FROM product
             ORDER BY NAME
             LIMIT 50
         """
@@ -67,7 +67,7 @@ class SearchModel(QSqlQueryModel):
             self.search(self.search_str, self.filter, show_msg=False)
         else:
             query = """
-            SELECT id, name, brand, price, category FROM product
+            SELECT id, name, brand, price, category, code FROM product
             ORDER BY NAME
             LIMIT 50
             """
