@@ -36,7 +36,7 @@ class StockWindow(QWidget):
         self.batch_model = BatchModel(db)
         stock_title = QLabel("Inventario")
         batch_title = QLabel("Lotes")
-        self.edit_stock_btn = QPushButton(QIcon(Paths.icon("pencil.png")), "Editar Cantidad en Inventario")
+        self.edit_stock_btn = QPushButton(QIcon(Paths.icon("pencil.png")), "Editar Inventario")
         self.add_batch_btn = QPushButton(QIcon(Paths.icon("plus-button.png")),"Agregar Lote")
         self.resolve_batch_btn = QPushButton(QIcon(Paths.icon("blue-document-task.png")), "Resolver")
         self.add_discount_btn = QPushButton(QIcon(Paths.icon("chart-down.png")), "Agregar descuento")
