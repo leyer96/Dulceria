@@ -322,7 +322,7 @@ class AdminWindow(QWidget):
     def delete_category(self):
         if len(self.settings["gui"]["product_categories"]) > 2:
             text = self.select_category_input.currentText()
-            if text == "Granel":
+            if text == "Granel" or text == "Otro":
                 QMessageBox.information(self, "Categoría Esencial", "Esta categoría no puede ser eliminada")
                 return
             index = self.select_category_input.currentIndex()

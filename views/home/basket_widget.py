@@ -30,7 +30,7 @@ class BasketWidget(QWidget):
         self.table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
 
-        l1 = QLabel("Carrito")
+        l1 = QLabel("CARRITO")
         l2 = QLabel("TOTAL")
 
         self.amount_label = QLabel("$0")
@@ -39,8 +39,10 @@ class BasketWidget(QWidget):
         # self.edit_btn = QPushButton(QIcon(Paths.icon("shopping-basket--pencil.png")),"Editar")
         confirm_btn = QPushButton(QIcon(Paths.icon("credit-card--plus.png")),"Cobrar")
 
-        # LAYOUT
+        # CONFIG
+        l1.setStyleSheet("font-size: 20px;")
 
+        # LAYOUT
         layout = QHBoxLayout()
 
         btns_layout = QHBoxLayout()
