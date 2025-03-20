@@ -49,7 +49,7 @@ class Menu(QWidget):
         layout.setAlignment(self.go_to_deals_btn, Qt.AlignHCenter)
         layout.setAlignment(self.go_to_admin_window_btn, Qt.AlignHCenter)
 
-        layout.setSpacing(1)
+        layout.setSpacing(10)
 
         self.setLayout(layout)
 
