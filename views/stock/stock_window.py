@@ -7,7 +7,8 @@ from PySide6.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QLabel,
-    QMessageBox
+    QMessageBox,
+    QTabWidget
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QPixmap
@@ -41,6 +42,9 @@ class StockWindow(QWidget):
         self.resolve_batch_btn = QPushButton(QIcon(Paths.icon("blue-document-task.png")), "Resolver")
         self.add_discount_btn = QPushButton(QIcon(Paths.icon("chart-down.png")), "Agregar descuento")
         self.add_deal_btn = QPushButton(QIcon(Paths.icon("star.png")), "Agregar Promoción")
+
+        stock_widget = QWidget()
+        batch_widget = QWidget()
         
         # CONFIG
         self.stock_table.setModel(self.stock_model)
@@ -85,22 +89,32 @@ class StockWindow(QWidget):
         logo_label.setPixmap(logo_pixmap)
         
         # LAYOUT
+        stock_layout = QVBoxLayout()
+        stock_layout.addWidget(self.stock_table)
+        stock_layout.addWidget(self.edit_stock_btn)
+        stock_widget.setLayout(stock_layout)
+
         buttons_layout = QHBoxLayout()
         buttons_layout.addWidget(self.add_batch_btn)
         buttons_layout.addWidget(self.resolve_batch_btn)
         buttons_layout.addWidget(self.add_discount_btn)
         buttons_layout.addWidget(self.add_deal_btn)
 
+        batch_layout = QVBoxLayout()
+        batch_layout.addWidget(self.batch_table)
+        batch_layout.addLayout(buttons_layout)
+        batch_widget.setLayout(batch_layout)
+
+        tab_widget = QTabWidget()
+        tab_widget.addTab(stock_widget, "Global")
+        tab_widget.addTab(batch_widget, "Lotes")
+
         layout = QHBoxLayout()
 
         left_layout = QVBoxLayout()
         left_layout.addWidget(stock_title)
         left_layout.addWidget(self.search_widget)
-        left_layout.addWidget(self.stock_table)
-        left_layout.addWidget(self.edit_stock_btn)
-        left_layout.addWidget(batch_title)
-        left_layout.addWidget(self.batch_table)
-        left_layout.addLayout(buttons_layout)
+        left_layout.addWidget(tab_widget)
 
         right_layout = QVBoxLayout()
         right_layout.addWidget(logo_label)
