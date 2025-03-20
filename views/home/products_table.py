@@ -52,10 +52,11 @@ class SearchBox(QWidget):
         self.model.error.connect(self.add_btn.setEnabled(False))
         self.model.no_record.connect(lambda: QMessageBox.information(self, "Sin Emparejamiento", "No se encontró producto con la información proporcionada."))
 
-        # PROPS
+        # CONFIG
         self.selected_row = None
         self.add_btn.setEnabled(False)
         self.add_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.add_btn.setStyleSheet("height: 20px;")
         self.setLayout(layout)
 
     def on_clicked_row(self, index):

@@ -41,6 +41,7 @@ class BasketWidget(QWidget):
 
         # CONFIG
         l1.setStyleSheet("font-size: 20px;")
+        self.del_btn.setStyleSheet("height: 20px;")
 
         # LAYOUT
         layout = QHBoxLayout()
