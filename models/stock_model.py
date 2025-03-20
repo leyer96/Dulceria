@@ -27,7 +27,7 @@ class StockModel(QSqlQueryModel):
         self.search_str = search_str
         self.filter = filter
         query = """
-            SELECT product.id, product.name, product.brand, product.category, stock.amount FROM stock
+            SELECT stock.id, product.name, product.brand, product.category, stock.amount FROM stock
             JOIN product ON stock.product_id = product.id
             WHERE product.{} LIKE :search_str
             ORDER BY stock.amount
@@ -48,7 +48,7 @@ class StockModel(QSqlQueryModel):
 
     def get_all_stock(self):
         query = """
-            SELECT product.id, product.name, product.brand, product.category, stock.amount FROM stock
+            SELECT stock.id, product.name, product.brand, product.category, stock.amount FROM stock
             JOIN product ON stock.product_id = product.id
             ORDER BY stock.amount
             LIMIT 50

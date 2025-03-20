@@ -41,6 +41,8 @@ class BasketWidget(QWidget):
 
         # CONFIG
         l1.setStyleSheet("font-size: 20px;")
+        l2.setStyleSheet("font-size: 20px;")
+        self.amount_label.setStyleSheet("font-size: 20px;")
         self.del_btn.setStyleSheet("height: 20px;")
 
         # LAYOUT

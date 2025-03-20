@@ -12,10 +12,12 @@ import sqlite3
 
 class EditStockDialog(QDialog):
     saved = Signal()
-    def __init__(self, product_data):
+    def __init__(self, product_data, stock_id):
         super().__init__()
 
         self.product_id = product_data["product_id"]
+        self.stock_id = stock_id
+
         if product_data["type"] == "Granel":
             product_label = QLabel(f"{product_data['brand']} {product_data['product']} (gr.)")
         else:
@@ -47,13 +49,15 @@ class EditStockDialog(QDialog):
         self.setLayout(layout)
 
     def update_stock(self):
+        print("UPDATING STOCK")
         con = sqlite3.connect(Paths.test("db.db"))
         # con = sqlite3.connect(Paths.db())
         cur = con.cursor()
         amount = self.amount_input.value()
         query = "UPDATE stock SET amount = ? WHERE id = ?"
+        print(f"AMOUNT {amount}; STOCK ID {self.stock_id}" )
         try:
-            cur.execute(query, (amount, self.product_id))
+            cur.execute(query, (amount, self.stock_id))
         except sqlite3.Error as e:
             print(e)
             QMessageBox.critical(self, "Error", "Ha ocurrido un error. Contacte al administrador")

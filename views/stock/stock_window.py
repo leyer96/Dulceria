@@ -182,7 +182,8 @@ class StockWindow(QWidget):
                 "amount": amount,
                 "type": type
             }
-            dlg = EditStockDialog(product_data)
+            stock_id = self.stock_model.data(self.stock_model.index(row,0), Qt.DisplayRole)
+            dlg = EditStockDialog(product_data,stock_id)
             dlg.saved.connect(self.stock_model.refresh_table)
             dlg.saved.connect(self.batch_model.refresh_table)
             dlg.exec()  
