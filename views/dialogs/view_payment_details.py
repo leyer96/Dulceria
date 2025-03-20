@@ -20,6 +20,7 @@ class ViewPaymentDetailsDialog(QDialog):
         self.time_label = QLabel("Hora: " + time)
         self.quantity_label = QLabel("Cantidad: " + str(payment_data["amount"]))
         self.payment_form_label = QLabel("Forma de pago: " + payment_data["payment_form"])
+        self.note_label = QLabel("Nota: " + payment_data["note"])
         l1 = QLabel("Productos: ")
         self.products_and_amount_label = QLabel()
 
@@ -32,6 +33,7 @@ class ViewPaymentDetailsDialog(QDialog):
         layout.addWidget(self.payment_form_label)
         layout.addWidget(l1)
         layout.addWidget(self.products_and_amount_label)
+        layout.addWidget(self.note_label)
 
         self.setLayout(layout)
 
