@@ -22,6 +22,7 @@ class StockModel(QSqlQueryModel):
                 if product_type == "Granel":
                     value = str(value) + " gr"
             return value
+        
     def search(self, search_str, filter, show_msg=True):
         self.search_str = search_str
         self.filter = filter

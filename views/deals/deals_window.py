@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QTableView,
-    QGridLayout,
     QAbstractItemView,
+    QTabWidget,
     QHeaderView,
     QPushButton,
     QWidget,
@@ -33,6 +33,9 @@ class DealsWindow(QWidget):
         discounts_title = QLabel("Descuentos")
         self.delete_deal_btn = QPushButton(QIcon(Paths.icon("minus-button.png")), "Eliminar")
         self.delete_discount_btn = QPushButton(QIcon(Paths.icon("minus-button.png")), "Eliminar")
+
+        deals_widget = QWidget()
+        discounts_widget = QWidget()
         
         # CONFIG
         self.deal_table.setModel(self.deal_model)
@@ -77,14 +80,24 @@ class DealsWindow(QWidget):
         # LAYOUT
         layout = QHBoxLayout()
 
+        discounts_layout = QVBoxLayout()
+        discounts_layout.addWidget(self.discount_table)
+        discounts_layout.addWidget(self.delete_discount_btn)
+        discounts_widget.setLayout(discounts_layout)
+
+        deals_layout = QVBoxLayout()
+        deals_layout.addWidget(self.deal_table)
+        deals_layout.addWidget(self.delete_deal_btn)
+        deals_widget.setLayout(deals_layout)
+        
+        tab_widget = QTabWidget()
+        tab_widget.addTab(deals_widget, "Promociones")
+        tab_widget.addTab(discounts_widget, "Descuentos")
+
         left_layout = QVBoxLayout()
         left_layout.addWidget(self.deals_title)
         left_layout.addWidget(self.search_widget)
-        left_layout.addWidget(self.deal_table)
-        left_layout.addWidget(self.delete_deal_btn)
-        left_layout.addWidget(discounts_title)
-        left_layout.addWidget(self.discount_table)
-        left_layout.addWidget(self.delete_discount_btn)
+        left_layout.addWidget(tab_widget)
 
         right_layout = QVBoxLayout()
         right_layout.addWidget(logo_label)
