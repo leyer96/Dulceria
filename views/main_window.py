@@ -42,9 +42,9 @@ class MainWindow(QMainWindow):
                     if isinstance(wj, DealsWindow):
                         wi.checkout.payment_saved.connect(wj.deal_model.refresh_table)
                         wi.checkout.payment_saved.connect(wj.discount_model.refresh_table)
-                    if isinstance(wj, PaymentsWindow):
+                    elif isinstance(wj, PaymentsWindow):
                         wi.checkout.payment_saved.connect(wj.model.get_todays_payment)
-                    if isinstance(wj, StockWindow):
+                    elif isinstance(wj, StockWindow):
                         wi.checkout.payment_saved.connect(wj.stock_model.refresh_table)
                 elif isinstance(wi, StockWindow):
                     if isinstance(wj, DealsWindow):
@@ -58,6 +58,9 @@ class MainWindow(QMainWindow):
                     wi.new_settings.connect(wj.load_settings)
                     wj.menu.go_to_admin.connect(wi.hide_content)
                 elif isinstance(wi, ProductsWindow):
+                    if isinstance(wj, HomeWindow):
+                        wi.product_created.connect(wj.search_box.model.refresh_table)
+                        wi.product_edited.connect(wj.search_box.model.refresh_table)
                     if isinstance(wj, StockWindow):
                         wi.model.product_deleted.connect(wj.stock_model.refresh_table)
                         wi.model.product_deleted.connect(wj.batch_model.refresh_table)
