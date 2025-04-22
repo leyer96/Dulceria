@@ -1,4 +1,6 @@
 import os
+import random
+
 class Paths:
     base = os.path.dirname(__file__)
     data = os.path.join(base, "data")
@@ -243,6 +245,16 @@ def drop_db_tables():
     cur.execute("DROP TABLE IF EXISTS batch")
     cur.execute("DROP TABLE IF EXISTS deal")
     cur.execute("DROP TABLE IF EXISTS discount")
+
+
+def generate_new_product_code():
+    con = sqlite3.connect(Paths.test("db.db"))
+    cur = con.cursor()
+    existing_codes = cur.execute("SELECT code FROM product").fetchall()
+    new_code = random.randint(1000, 9999)
+    while new_code in existing_codes:
+        new_code = random.randint(1000, 9999)
+    return str(new_code)
 
 
 def save_payment(payment_data, products):

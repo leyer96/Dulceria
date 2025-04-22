@@ -12,6 +12,13 @@ db.setDatabaseName(Paths.test("db.db"))
 # db.setDatabaseName(Paths.db()) 
 db.open()
 
+try: 
+    from ctypes import windll # Only exists on Windows.
+    myappid = "aigenappz.dulceria.gui.v1"
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+except ImportError:
+    pass
+
 w = MainWindow(db)
 
 app.exec()

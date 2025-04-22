@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QMessageBox
 )
 from PySide6.QtCore import Signal, Qt
-from utils import Paths
+from utils import Paths, generate_new_product_code
 import sqlite3
 
 
@@ -170,8 +170,11 @@ class AddItemDialog(QDialog):
             con.commit()
         except sqlite3.IntegrityError as e:
             print(e)
-            self.message_label.setText("Ya existe un producto con este nombre o código. Modifique el producto o elimínelo.")
+            new_code = generate_new_product_code()
+            self.message_label.setText("Ya existe un producto con este nombre o código. Modifique el producto o elimínelo. Intente con el código propuesto.")
             self.message_label.show()
+            print(f"NEW CODE: {new_code}")
+            self.code_input.setText(new_code)
         except sqlite3.Error as e:
             print(e)
             self.message_label.setText("Ha ocurrido un error. Contacte al desarrollador")
